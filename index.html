@@ -199,13 +199,15 @@
 
 <header>
   <div class="brand" style="display:flex; align-items:center; gap:10px;">
-    <img src="logo.png" alt="logo" style="height:36px;border-radius:6px;">
+    <img src="logo.jpeg" alt="logo" style="height:42px; width:42px; object-fit:cover; border-radius:4px;">
     <h1>Ai1 Gujarati Snacks</h1>
   </div>
 
   <!-- Cart Icon -->
   <div style="display:flex; align-items:center; gap:16px;">
-    <a href="products.html" style="text-decoration:none; font-weight:700; color:#d65a00;">Products</a>
+    <a href="products.html"
+       style="text-decoration:none; font-weight:700; color:#d65a00;">Products</a>
+
     <div class="phone">7984090490</div>
 
     <div onclick="openCartSheet()" style="cursor:pointer; position:relative; font-size:22px;">
@@ -214,6 +216,7 @@
     </div>
   </div>
 </header>
+
 
 <!-- ===================== HERO SECTION ===================== -->
 <section class="hero-section" 
@@ -227,7 +230,7 @@ style="
   font-weight: 700;
 ">
 <div class="homepage-logo">
-  <img src="logo-main.png" alt="Ai1 Gujarati Logo">
+  <img src="logo.jpeg" style="height:402px; width:402px; object-fit:cover; border-radius:40px alt="Ai1 Gujarati Logo">
 </div>
   
 <h1 style="font-size: 42px; text-shadow: 0 4px 15px rgba(0,0,0,0.5);">
@@ -273,7 +276,7 @@ style="
 
     <!-- PRODUCT 1 -->
     <div class="card" data-name="Methi Khakhra" data-price="135">
-      <img src="methi-khakhra.jpg" alt="Methi Khakhra">
+      <img src="methi-khakhra.png" alt="Methi Khakhra">
       <h3>Methi Khakhra</h3>
       <div class="price">₹135</div>
       <div class="actions">
@@ -288,7 +291,7 @@ style="
 
     <!-- PRODUCT 2 -->
     <div class="card" data-name="Sev" data-price="80">
-      <img src="sev.jpg" alt="Sev">
+      <img src="sev.png" alt="Sev">
       <h3>Sev</h3>
       <div class="price">₹80</div>
       <div class="actions">
@@ -303,7 +306,7 @@ style="
 
     <!-- PRODUCT 3 -->
     <div class="card" data-name="Bhakharvadi" data-price="90">
-      <img src="bhakharvadi.jpg" alt="Bhakharvadi">
+      <img src="bhakharvadi.png" alt="Bhakharvadi">
       <h3>Bhakharvadi</h3>
       <div class="price">₹90</div>
       <div class="actions">
@@ -317,6 +320,20 @@ style="
     </div>
 
   </section>
+
+<div style="text-align:center; margin: 30px 0;">
+  <a href="products.html"
+ style="
+      display:inline-block;
+      padding:14px 24px;
+      background:#ff9933;
+      color:white;
+      font-size:18px;
+      font-weight:700;
+      border-radius:12px;
+      text-decoration:none;
+  ">More Products</a>
+</div>
 
 <!-- ===================== PRODUCT HIGHLIGHT ===================== -->
 <section style="padding:50px 20px; background:#fffaf2;">
@@ -478,7 +495,7 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxXGK5MY1jk4M8y
 let cart = [];
 
 /* ------------------ Utilities ------------------ */
-const weightMultipliers = { "250g":0.5, "500g":1, "1kg":2 };
+const weightMultipliers = { "250g": 1, "500g": 2, "1kg": 4 };
 
 function safeParseInt(v){ return parseInt(String(v||"0").replace(/[^\d]/g,''),10) || 0; }
 

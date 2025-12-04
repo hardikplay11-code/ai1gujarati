@@ -541,7 +541,13 @@ function renderCart(){
   let html = "";
   cart.forEach((item, index)=>{
     const price = findProductPrice(item.name);
-    const mult = weightMultipliers[item.weight] || 1;
+    let mult;
+if (item.name === "Methi Khakhra") {
+    mult = item.weight === "1kg" ? 2 : 1;  // 500g = 1, 1kg = 2
+} else {
+    mult = weightMultipliers[item.weight] || 1;
+}
+    
     const line = price * mult * item.qty;
     subtotal += line;
 
@@ -702,7 +708,12 @@ function computeOrderSheetPrice(){
     });
   } else {
     const unit = os_current.unit || findProductPrice(os_current.name) || 0;
-    const mult = weightMultipliers[os_current.weight] || 1;
+    let mult;
+if (os_current.name === "Methi Khakhra") {
+    mult = os_current.weight === "1kg" ? 2 : 1;
+} else {
+    mult = weightMultipliers[os_current.weight] || 1;
+}
     subtotal = unit * mult * (parseInt(os_current.qty||1,10) || 1);
   }
   document.getElementById("os_line").innerText = "₹" + subtotal;
@@ -800,3 +811,4 @@ document.addEventListener('DOMContentLoaded', function(){
 <script src="main-cart.js"></script>
 
 </html>
+

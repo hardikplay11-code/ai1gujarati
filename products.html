@@ -163,10 +163,9 @@ function smartSearchProducts() {
 const term = document.getElementById("smartSearch").value.toLowerCase();
 const cards = document.querySelectorAll('.card');
 
-
 cards.forEach(card => {
-const name = card.dataset.name.toLowerCase();
-card.style.display = name.includes(term) ? 'block' : 'none';
+  const name = card.dataset.name.toLowerCase();
+  card.style.display = name.includes(term) ? 'block' : 'none';
 });
 }
 </script>
@@ -453,3 +452,4 @@ document.addEventListener('DOMContentLoaded', function(){ renderCart(); });
 </script>
 </body>
 </html>
+

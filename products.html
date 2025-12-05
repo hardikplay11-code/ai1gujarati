@@ -180,11 +180,11 @@ card.style.display = name.includes(term) ? 'block' : 'none';
       <img src="methi-khakhra.png" alt="Methi Khakhra">
       <h3>Methi Khakhra</h3>
       <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Crispy, aromatic methi-flavored khakhra roasted to perfection. A traditional Gujarati snack perfect for tea-time.</p>
-      <div class="price">₹135</div>
+      <div class="price">₹65</div>
       <div class="actions">
         <select class="qty-box">
+          <option value="250g">250g</option>
           <option value="500g">500g</option>
-          <option value="1kg">1kg</option>
         </select>
         <button class="btn whatsapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
         <button class="btn cart-btn" onclick="addCartFromCard(this.closest('.card'))">Add to Cart</button>
@@ -453,3 +453,4 @@ document.addEventListener('DOMContentLoaded', function(){ renderCart(); });
 </script>
 </body>
 </html>
+

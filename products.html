@@ -1,95 +1,195 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Products - Ai1 Gujarati Snacks</title>
 
+  <style>
+    * { box-sizing: border-box; margin:0; padding:0; }
+    :root{ --accent:#ff9933; --wh:#25d366; --bg:#fff4e0; --card:#fff; }
+    body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color:#3a2e25; }
 
-#cartBadge { position:absolute; top:-6px; right:-10px; background:#ff9933; color:white; padding:2px 6px; border-radius:50%; font-size:12px; }
+    header { 
+      position: sticky; top:0; 
+      background:#fff4e0; padding:18px 12px; 
+      display:flex; align-items:center; justify-content:space-between;
+      z-index:1000;
+    }
+    header h1 { font-size:20px; font-weight:800; }
 
+    /* Cart Icon Badge */
+    #cartBadge {
+      position:absolute; 
+      top:-6px; right:-10px;
+      background:#ff9933;
+      color:white;
+      padding:2px 6px;
+      border-radius:50%;
+      font-size:12px;
+    }
 
-.container{ max-width:1100px; margin:0 auto; padding:18px; }
-.section-title { text-align:center; font-size:32px; font-weight:800; margin-top:40px; margin-bottom:20px; color:#3a2e25; }
+    .container{ max-width:1100px; margin:0 auto; padding:18px; }
+    .section-title { text-align:center; font-size:32px; font-weight:800; margin-top:40px; margin-bottom:20px; color:#3a2e25; }
+    .products { 
+      padding: 18px 0 40px; 
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 18px; 
+    }
+    .card { 
+      background: var(--card); 
+      border-radius: 14px; 
+      padding: 14px; 
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08); 
+      position:relative; 
+      display:flex; flex-direction:column; gap:8px;
+    }
 
+    .actions{ display:flex; gap:8px; margin-top:10px; align-items:center; }
+    .btn { display:inline-flex; align-items:center; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; border:none; }
+    .whatsapp-btn{ background:var(--wh); color:#fff; text-decoration:none; }
+    .cart-btn{ background:var(--accent); color:#fff; }
 
-.products { padding: 18px 0 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+    /* CART SHEET */
+    #cartSheet {
+      position: fixed; left: 0; right: 0; bottom: -100%; height: 72%; background: #ffffffcc; backdrop-filter: blur(12px); border-radius: 24px 24px 0 0; box-shadow: 0 -10px 25px rgba(0,0,0,0.15); transition: bottom .35s cubic-bezier(.25,.8,.25,1); z-index: 9999; padding: 20px; overflow-y: auto;
+    }
+    #cartSheet.show { bottom: 0; }
 
+    .cart-item { display: flex; gap: 12px; padding: 12px; border-radius: 14px; background: white; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .cart-item img { width: 68px; height: 68px; border-radius: 12px; object-fit: cover; }
+    .cart-info { flex: 1; }
+    .cart-title { font-size: 16px; font-weight: 700; }
+    .cart-weight { font-size: 13px; color:#777; margin-top: 2px; }
+    .cart-qty { display:flex; align-items:center; gap:10px; margin-top:8px; }
+    .cart-qty button{ width:30px; height:30px; background:#ff9933; border:none; color:white; border-radius:8px; font-size:18px; cursor:pointer; }
+    .cart-remove{ font-size:13px; color:red; cursor:pointer; margin-top:5px; }
+    #cartTotalBar { position: sticky; bottom: 0; background: white; padding: 14px 18px; border-radius: 16px; box-shadow: 0 -5px 15px rgba(0,0,0,0.12); margin-top: 12px; }
+    #checkoutBtn { width: 100%; padding: 14px; background: #ff9933; border: none; color: white; font-size: 18px; font-weight: 700; border-radius: 14px; margin-top: 10px; cursor: pointer; }
 
-.card { background: var(--card); border-radius: 18px; padding: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.10); transition: transform 0.25s ease, box-shadow 0.25s ease; }
-.card img { height: 240px; border-radius: 16px; transition: transform 0.3s ease; width:100%; object-fit:cover; }
-.card:hover { transform: translateY(-6px); box-shadow: 0 10px 28px rgba(0,0,0,0.15); }
-.card:hover img { transform: scale(1.05); }
+    /* ORDER SHEET */
+    #orderSheet { position: fixed; left:0; right:0; bottom:-110%; height:78%; background:#ffffffee; backdrop-filter: blur(10px); border-radius:20px 20px 0 0; box-shadow:0 -12px 30px rgba(0,0,0,0.18); transition: bottom .35s cubic-bezier(.25,.8,.25,1); z-index:10010; padding:18px; overflow-y:auto; }
+    #orderSheet.show { bottom: 0; }
+    .order-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .order-product { display:flex; gap:12px; align-items:center; padding:12px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+    .order-product img { width:80px; height:80px; object-fit:cover; border-radius:10px; }
+    .order-product .meta { flex:1; }
+    .order-meta-title { font-weight:800; font-size:16px; }
+    .order-meta-weight { font-size:13px; color:#666; margin-top:4px; }
+    .order-qty button { width:36px; height:36px; border-radius:10px; background:var(--accent); color:white; border:none; font-size:20px; cursor:pointer; }
+    .order-actions .btn { flex:1; text-align:center; }
+    .order-info .fc-field { margin-top:8px; width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; }
+    .order-price { margin-top:12px; display:flex; justify-content:space-between; font-weight:800; font-size:18px; }
 
+    @media (max-width:520px){ .order-product img { width:72px; height:72px; } #orderSheet { height:86%; } }
+  @media (max-width: 900px) {
+  .products {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 
-.actions{ display:flex; gap:8px; margin-top:10px; align-items:center; }
-.btn { display:inline-flex; align-items:center; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; border:none; }
-.whatsapp-btn{ background:var(--wh); color:#fff; text-decoration:none; }
-.cart-btn{ background:var(--accent); color:#fff; }
+@media (max-width: 600px) {
+  .products {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+.products {
+  gap: 30px !important;
+}
 
+.card {
+  padding: 20px !important;
+  border-radius: 18px !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.10) !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+}
 
-#cartSheet { position: fixed; left:0; right:0; bottom:-100%; height:72%; background:#ffffffcc; backdrop-filter: blur(12px); border-radius:24px 24px 0 0; padding:20px; overflow-y:auto; transition:.35s; }
-#cartSheet.show { bottom:0; }
+.card img {
+  height: 240px !important;
+  border-radius: 16px !important;
+  transition: transform 0.3s ease !important;
+}
 
+.card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.15) !important;
+}
 
-#orderSheet { position: fixed; left:0; right:0; bottom:-110%; height:78%; background:#ffffffee; border-radius:20px 20px 0 0; padding:18px; overflow-y:auto; transition:.35s; }
-#orderSheet.show { bottom:0; }
+.card:hover img {
+  transform: scale(1.05) !important;
+}
 
+.btn:hover {
+  opacity: 0.9 !important;
+  transform: scale(1.03) !important;
+  transition: 0.2s !important;
+}
 
-@media (max-width:900px){ .products{ grid-template-columns:repeat(2,1fr); } }
-@media (max-width:600px){ .products{ grid-template-columns:repeat(1,1fr); } }
 </style>
 </head>
 <body>
 
-
 <header>
-<div style="display:flex; align-items:center; gap:10px;">
-<img src="logo.png" style="height:36px;border-radius:6px;">
-<h1>Ai1 Gujarati Snacks</h1>
-</div>
+  <div class="brand" style="display:flex; align-items:center; gap:10px;">
+    <img src="logo.png" alt="logo" style="height:36px;border-radius:6px;">
+    <h1>Ai1 Gujarati Snacks</h1>
+  </div>
 
+  <div style="display:flex; align-items:center; gap:16px;">
+    <a href="index.html" style="padding:8px 14px; background:#ff9933; color:white; border-radius:8px; font-weight:700; text-decoration:none;">Home</a>
 
-<div style="display:flex; align-items:center; gap:16px;">
-<a href="index.html" style="padding:8px 14px; background:#ff9933; color:white; border-radius:8px; font-weight:700; text-decoration:none;">Home</a>
-<div>7984090490</div>
-<div onclick="openCartSheet()" style="cursor:pointer; position:relative; font-size:22px;">🛒<span id="cartBadge">0</span></div>
-</div>
+    <div class="phone">7984090490</div>
+
+    <div onclick="openCartSheet()" style="cursor:pointer; position:relative; font-size:22px;">
+      🛒
+      <span id="cartBadge">0</span>
+    </div>
+  </div>
 </header>
-
 
 <h2 class="section-title">Products</h2>
 
-
+<!-- Search Bar Added Below Products Title -->
 <div style="max-width:420px; margin:10px auto 28px auto;">
-<input id="smartSearch" placeholder="Search products..." oninput="smartSearchProducts()" style="width:100%; padding:12px 16px; border:2px solid #ff9933; border-radius:12px; font-size:16px;">
+<input type="text" id="smartSearch" placeholder="Search products..."
+oninput="smartSearchProducts()"
+style="width:100%; padding:12px 16px; border:2px solid #ff9933; border-radius:12px; font-size:16px; outline:none; box-shadow:0 3px 10px rgba(0,0,0,0.05);">
 </div>
 
 
 <script>
-function smartSearchProducts(){
-const term=document.getElementById("smartSearch").value.toLowerCase();
-document.querySelectorAll('.card').forEach(card=>{
-const name=card.dataset.name.toLowerCase();
-card.style.display=name.includes(term)?'block':'none';
+function smartSearchProducts() {
+const term = document.getElementById("smartSearch").value.toLowerCase();
+const cards = document.querySelectorAll('.card');
+
+
+cards.forEach(card => {
+const name = card.dataset.name.toLowerCase();
+card.style.display = name.includes(term) ? 'block' : 'none';
 });
 }
 </script>
 
-
 <main class="container">
-<section class="products">
+  <!-- PRODUCTS (identical markup to your homepage) -->
+  <section class="products">
 
     <!-- PRODUCT 1 -->
     <div class="card" data-name="Methi Khakhra" data-price="135">
-<img src="methi-khakhra.png">
-<h3>Methi Khakhra</h3>
-<p style="font-size:14px;color:#6b5b4d;">Crispy aromatic methi-flavored khakhra.</p>
-<div class="price">₹135</div>
-<div class="actions">
-<select class="qty-box">
-<option value="500g">500g</option>
-<option value="1kg">1kg</option>
-</select>
-<button class="btn whatsapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
-<button class="btn cart-btn" onclick="addCartFromCard(this.closest('.card'))">Add to Cart</button>
-</div>
-</div>
+      <img src="methi-khakhra.png" alt="Methi Khakhra">
+      <h3>Methi Khakhra</h3>
+      <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Crispy, aromatic methi-flavored khakhra roasted to perfection. A traditional Gujarati snack perfect for tea-time.</p>
+      <div class="price">₹135</div>
+      <div class="actions">
+        <select class="qty-box">
+          <option value="500g">500g</option>
+          <option value="1kg">1kg</option>
+        </select>
+        <button class="btn whatsapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
+        <button class="btn cart-btn" onclick="addCartFromCard(this.closest('.card'))">Add to Cart</button>
+      </div>
+    </div>
 
     <!-- PRODUCT 2 -->
     <div class="card" data-name="Sev" data-price="80">
@@ -326,8 +426,7 @@ card.style.display=name.includes(term)?'block':'none';
 /* MERGED SCRIPT FROM HOMEPAGE - copied verbatim so products page uses same functions */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxXGK5MY1jk4M8yBhQKEQjWu3SXoPfQK4rsgGgi-ibKl00eF60OdhaADE1fBZOZrU-0lA/exec";
 let cart = [];
-const weightMultipliers = { "250g": 1, "500g": 2, "1kg": 4 }
-const methiMultipliers={"500g":1,"1kg":2};
+const weightMultipliers = { "250g": 1, "500g": 2, "1kg": 4 };
 function safeParseInt(v){ return parseInt(String(v||"0").replace(/[^\d]/g,''),10) || 0; }
 function findProductPrice(name){ const card = [...document.querySelectorAll(".card")].find(c => c.dataset.name === name); return safeParseInt(card?.dataset?.price); }
 function openCartSheet(){ document.getElementById("cartSheet").classList.add("show"); }
@@ -354,4 +453,3 @@ document.addEventListener('DOMContentLoaded', function(){ renderCart(); });
 </script>
 </body>
 </html>
-

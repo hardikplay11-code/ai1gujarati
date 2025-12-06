@@ -42,10 +42,29 @@
 </div>
 
 <script>
-let method = "";
-let amount = new URLSearchParams(window.location.search).get("amount") || 0;
+const APPS_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbxXGK5MY1jk4M8yBhQKEQjWu3SXoPfQK4rsgGgi-ibKl00eF60OdhaADE1fBZOZrU-0lA/exec";
+
+// Read data from URL
+let params = new URLSearchParams(window.location.search);
+let amount = params.get("amount") || 0;
+let rawData = params.get("data");
+
 document.getElementById("payAmount").innerText = amount;
 
+// Convert encoded customer data
+let orderData = {};
+try {
+  orderData = JSON.parse(decodeURIComponent(rawData));
+} catch (e) {
+  orderData = {};
+}
+
+let method = "";
+
+// -----------------------
+// Select method
+// -----------------------
 function selectMethod(m){
   method = m;
   document.getElementById("cod").classList.remove("active");
@@ -59,18 +78,53 @@ function selectMethod(m){
   }
 }
 
+// -----------------------
+// Confirm Payment
+// -----------------------
 function confirmPayment(){
   if(method === ""){
     alert("Please select a payment method.");
     return;
   }
 
+  let utr = "";
   if(method === "upi"){
-    const utr = document.getElementById("utr").value.trim();
-    if(!utr){ alert("Please enter UPI Transaction ID."); return; }
+    utr = document.getElementById("utr").value.trim();
+    if(!utr){
+      alert("Please enter UPI Transaction ID.");
+      return;
+    }
   }
 
-  alert("Payment confirmed! Your order is placed.");
+  let orderId = "ORD-" + Math.floor(1000 + Math.random() * 9000);
+
+  // SEND TO GOOGLE SHEET 
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      orderId,
+      method,
+      amount,
+      utr,
+
+      // Customer Details
+      name: orderData.name,
+      phone: orderData.phone,
+      house: orderData.house,
+      street: orderData.street,
+      city: orderData.city,
+      pin: orderData.pin,
+
+      items: JSON.stringify(orderData.cart),
+
+      timestamp: new Date().toISOString()
+    })
+  });
+
+  alert("Your order has been placed successfully!\nOrder ID: " + orderId);
+
   window.location.href = "index.html";
 }
 </script>

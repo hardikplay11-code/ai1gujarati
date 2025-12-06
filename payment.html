@@ -4,21 +4,59 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Payment - Ai1 Gujarati Snacks</title>
+
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background:#fff4e0; padding:20px; }
-    .box { max-width:480px; margin:0 auto; background:white; padding:20px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,0.12); }
-    h2 { text-align:center; color:#d65a00; }
-    .method { padding:14px; border:1px solid #ddd; border-radius:12px; margin-top:12px; cursor:pointer; }
+    body { 
+      font-family: 'Segoe UI', sans-serif; 
+      background:#fff4e0; 
+      padding:20px; 
+      margin:0;
+    }
+    .box { 
+      max-width:480px; 
+      margin:0 auto; 
+      background:white; 
+      padding:20px; 
+      border-radius:16px; 
+      box-shadow:0 6px 18px rgba(0,0,0,0.12); 
+    }
+    h2 { text-align:center; color:#d65a00; font-size:26px; }
+    .method { 
+      padding:14px; 
+      border:1px solid #ddd; 
+      border-radius:12px; 
+      margin-top:12px; 
+      cursor:pointer;
+      font-size:18px;
+    }
     .active { border-color:#ff9933; background:#fff6ef; }
     #upiBox { display:none; margin-top:14px; text-align:center; }
-    #upiBox img { width:260px; border-radius:18px; }
-    button { width:100%; padding:14px; background:#ff9933; color:white; font-size:18px; font-weight:700; border:none; border-radius:12px; margin-top:20px; cursor:pointer; }
-    #amountBox { text-align:center; font-size:20px; font-weight:800; margin-top:10px; color:#3a2e25; }
+    #upiBox img { width:260px; border-radius:16px; }
+    button { 
+      width:100%; 
+      padding:16px; 
+      background:#ff9933; 
+      color:white; 
+      font-size:18px; 
+      font-weight:700; 
+      border:none; 
+      border-radius:12px; 
+      margin-top:20px; 
+      cursor:pointer;
+    }
+    #amountBox { 
+      text-align:center; 
+      font-size:22px; 
+      font-weight:800; 
+      margin-top:10px; 
+      color:#3a2e25; 
+    }
   </style>
 </head>
 <body>
 
 <div class="box">
+
   <h2>Choose Payment Method</h2>
 
   <div id="amountBox">Amount: ₹<span id="payAmount">0</span></div>
@@ -33,43 +71,51 @@
 
   <div id="upiBox">
     <p style="font-weight:700;">Scan & Pay</p>
+
+    <!-- Correct QR file name -->
     <img src="IMG-20251114-WA0000.jpg" alt="UPI QR">
-    <p style="margin-top:8px; font-size:14px;">UPI ID: <b>7984090490@kotak811</b></p>
-    <input id="utr" placeholder="Enter UPI Transaction ID" style="width:100%; padding:10px; margin-top:10px; border-radius:10px; border:1px solid #ccc;" />
+
+    <p style="font-size:14px; margin-top:6px;">UPI ID: <b>7984090490@kotak811</b></p>
+
+    <input 
+      id="utr" 
+      placeholder="Enter UPI Transaction ID" 
+      style="width:100%; padding:12px; margin-top:10px; border-radius:10px; border:1px solid #ccc;" 
+    />
   </div>
 
   <button onclick="confirmPayment()">Confirm Payment</button>
+
 </div>
 
 <script>
 const APPS_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbxXGK5MY1jk4M8yBhQKEQjWu3SXoPfQK4rsgGgi-ibKl00eF60OdhaADE1fBZOZrU-0lA/exec";
 
-// Read data from URL
+// Read URL params
 let params = new URLSearchParams(window.location.search);
 let amount = params.get("amount") || 0;
-let rawData = params.get("data");
+let encoded = params.get("data");
 
 document.getElementById("payAmount").innerText = amount;
 
-// Convert encoded customer data
+// Decode customer data
 let orderData = {};
 try {
-  orderData = JSON.parse(decodeURIComponent(rawData));
-} catch (e) {
+  orderData = JSON.parse(decodeURIComponent(encoded));
+} catch(e) {
   orderData = {};
 }
 
 let method = "";
 
-// -----------------------
-// Select method
-// -----------------------
+// Select payment method
 function selectMethod(m){
   method = m;
   document.getElementById("cod").classList.remove("active");
   document.getElementById("upi").classList.remove("active");
-  if(m === 'cod'){
+
+  if(m === "cod"){
     document.getElementById("cod").classList.add("active");
     document.getElementById("upiBox").style.display = "none";
   } else {
@@ -78,10 +124,9 @@ function selectMethod(m){
   }
 }
 
-// -----------------------
-// Confirm Payment
-// -----------------------
+// CONFIRM PAYMENT
 function confirmPayment(){
+
   if(method === ""){
     alert("Please select a payment method.");
     return;
@@ -91,14 +136,14 @@ function confirmPayment(){
   if(method === "upi"){
     utr = document.getElementById("utr").value.trim();
     if(!utr){
-      alert("Please enter UPI Transaction ID.");
+      alert("Please enter your UPI Transaction ID.");
       return;
     }
   }
 
   let orderId = "ORD-" + Math.floor(1000 + Math.random() * 9000);
 
-  // SEND TO GOOGLE SHEET 
+  // Send to Google Sheet
   fetch(APPS_SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
@@ -106,24 +151,23 @@ function confirmPayment(){
     body: JSON.stringify({
       orderId,
       method,
-      amount,
       utr,
+      amount,
 
-      // Customer Details
+      // Customer info
       name: orderData.name,
       phone: orderData.phone,
       house: orderData.house,
       street: orderData.street,
       city: orderData.city,
       pin: orderData.pin,
-
       items: JSON.stringify(orderData.cart),
 
       timestamp: new Date().toISOString()
     })
   });
 
-  alert("Your order has been placed successfully!\nOrder ID: " + orderId);
+  alert("Order Confirmed Successfully!\nOrder ID: " + orderId);
 
   window.location.href = "index.html";
 }

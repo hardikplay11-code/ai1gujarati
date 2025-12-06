@@ -6,53 +6,18 @@
   <title>Payment - Ai1 Gujarati Snacks</title>
 
   <style>
-    body { 
-      font-family: 'Segoe UI', sans-serif; 
-      background:#fff4e0; 
-      padding:20px; 
-      margin:0;
-    }
-    .box { 
-      max-width:480px; 
-      margin:0 auto; 
-      background:white; 
-      padding:20px; 
-      border-radius:16px; 
-      box-shadow:0 6px 18px rgba(0,0,0,0.12); 
-    }
-    h2 { text-align:center; color:#d65a00; font-size:26px; }
-    .method { 
-      padding:14px; 
-      border:1px solid #ddd; 
-      border-radius:12px; 
-      margin-top:12px; 
-      cursor:pointer;
-      font-size:18px;
-    }
+    body { font-family: 'Segoe UI', sans-serif; background:#fff4e0; padding:20px; margin:0; }
+    .box { max-width:480px; margin:0 auto; background:white; padding:20px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,0.12); }
+    h2 { text-align:center; color:#d65a00; }
+    .method { padding:14px; border:1px solid #ddd; border-radius:12px; margin-top:12px; cursor:pointer; }
     .active { border-color:#ff9933; background:#fff6ef; }
     #upiBox { display:none; margin-top:14px; text-align:center; }
     #upiBox img { width:260px; border-radius:16px; }
-    button { 
-      width:100%; 
-      padding:16px; 
-      background:#ff9933; 
-      color:white; 
-      font-size:18px; 
-      font-weight:700; 
-      border:none; 
-      border-radius:12px; 
-      margin-top:20px; 
-      cursor:pointer;
-    }
-    #amountBox { 
-      text-align:center; 
-      font-size:22px; 
-      font-weight:800; 
-      margin-top:10px; 
-      color:#3a2e25; 
-    }
+    button { width:100%; padding:16px; background:#ff9933; color:white; font-size:18px; font-weight:700; border:none; border-radius:12px; margin-top:20px; cursor:pointer; }
+    #amountBox { text-align:center; font-size:22px; font-weight:800; margin-top:10px; color:#3a2e25; }
   </style>
 </head>
+
 <body>
 
 <div class="box">
@@ -61,27 +26,18 @@
 
   <div id="amountBox">Amount: ₹<span id="payAmount">0</span></div>
 
-  <div id="cod" class="method" onclick="selectMethod('cod')">
-    💵 Cash on Delivery (COD)
-  </div>
-
-  <div id="upi" class="method" onclick="selectMethod('upi')">
-    📱 UPI QR (Scan & Pay)
-  </div>
+  <div id="cod" class="method" onclick="selectMethod('cod')">💵 Cash on Delivery</div>
+  <div id="upi" class="method" onclick="selectMethod('upi')">📱 UPI QR</div>
 
   <div id="upiBox">
     <p style="font-weight:700;">Scan & Pay</p>
 
-    <!-- Correct QR file name -->
     <img src="IMG-20251114-WA0000.jpg" alt="UPI QR">
 
-    <p style="font-size:14px; margin-top:6px;">UPI ID: <b>7984090490@kotak811</b></p>
+    <p style="font-size:14px;">UPI ID: <b>7984090490@kotak811</b></p>
 
-    <input 
-      id="utr" 
-      placeholder="Enter UPI Transaction ID" 
-      style="width:100%; padding:12px; margin-top:10px; border-radius:10px; border:1px solid #ccc;" 
-    />
+    <input id="utr" placeholder="Enter UPI Transaction ID"
+           style="width:100%; padding:12px; margin-top:10px; border-radius:10px; border:1px solid #ccc;" />
   </div>
 
   <button onclick="confirmPayment()">Confirm Payment</button>
@@ -92,24 +48,33 @@
 const APPS_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbxXGK5MY1jk4M8yBhQKEQjWu3SXoPfQK4rsgGgi-ibKl00eF60OdhaADE1fBZOZrU-0lA/exec";
 
-// Read URL params
+// Read params
 let params = new URLSearchParams(window.location.search);
 let amount = params.get("amount") || 0;
-let encoded = params.get("data");
-
 document.getElementById("payAmount").innerText = amount;
 
-// Decode customer data
+// Safe load of order data (no error possible)
 let orderData = {};
 try {
-  orderData = JSON.parse(decodeURIComponent(encoded));
+  let raw = params.get("data");
+  if (raw && raw !== "null" && raw !== "") {
+    orderData = JSON.parse(decodeURIComponent(raw));
+  }
 } catch(e) {
   orderData = {};
 }
 
-let method = "";
+// Default fields to avoid undefined errors
+orderData.name  = orderData.name  || "";
+orderData.phone = orderData.phone || "";
+orderData.house = orderData.house || "";
+orderData.street = orderData.street || "";
+orderData.city = orderData.city || "";
+orderData.pin = orderData.pin || "";
+orderData.cart = orderData.cart || [];
 
-// Select payment method
+// ----------------------------------
+let method = "";
 function selectMethod(m){
   method = m;
   document.getElementById("cod").classList.remove("active");
@@ -123,8 +88,8 @@ function selectMethod(m){
     document.getElementById("upiBox").style.display = "block";
   }
 }
+// ----------------------------------
 
-// CONFIRM PAYMENT
 function confirmPayment(){
 
   if(method === ""){
@@ -136,39 +101,35 @@ function confirmPayment(){
   if(method === "upi"){
     utr = document.getElementById("utr").value.trim();
     if(!utr){
-      alert("Please enter your UPI Transaction ID.");
+      alert("Please enter UPI Transaction ID.");
       return;
     }
   }
 
-  let orderId = "ORD-" + Math.floor(1000 + Math.random() * 9000);
+  let orderId = "ORD-" + Math.floor(Math.random() * 9000 + 1000);
 
-  // Send to Google Sheet
+  // SAFE FETCH (no crash possible)
   fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+    method:"POST",
+    mode:"no-cors",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
       orderId,
       method,
       utr,
       amount,
-
-      // Customer info
-      name: orderData.name,
-      phone: orderData.phone,
-      house: orderData.house,
-      street: orderData.street,
-      city: orderData.city,
-      pin: orderData.pin,
-      items: JSON.stringify(orderData.cart),
-
-      timestamp: new Date().toISOString()
+      name:orderData.name,
+      phone:orderData.phone,
+      house:orderData.house,
+      street:orderData.street,
+      city:orderData.city,
+      pin:orderData.pin,
+      items:JSON.stringify(orderData.cart),
+      timestamp:new Date().toISOString()
     })
   });
 
-  alert("Order Confirmed Successfully!\nOrder ID: " + orderId);
-
+  alert("Order Confirmed!\nOrder ID: " + orderId);
   window.location.href = "index.html";
 }
 </script>

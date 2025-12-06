@@ -502,8 +502,8 @@ function buyNow() {
     subtotal = unit * m * os_current.qty;
   }
 
-  // Redirect to  with amount
-  window.location.href = "?amount=" + subtotal;
+  // Redirect to payment.html with amount
+  window.location.href = "payment.html?amount=" + subtotal;
 }
 // FIXED: removed broken leftover code
 function closeFullOrder(){ document.getElementById("fullOrderPage").style.display="none"; }
@@ -512,5 +512,123 @@ function minimizeCartSheet(){ document.getElementById("cartSheet").classList.rem
 /* initialize */
 document.addEventListener('DOMContentLoaded', function(){ renderCart(); });
 </script>
+
+<!-- AUTO-ADDED ORDER SUBMITTER: sends order directly to Apps Script and email -->
+<script>
+(function(){
+  // Use APPS_SCRIPT_URL from page if defined, else fallback to known URL
+  const APPS_SCRIPT_URL = typeof APPS_SCRIPT_URL !== 'undefined' ? APPS_SCRIPT_URL : "https://script.google.com/macros/s/AKfycbxXGK5MY1jk4M8yBhQKEQjWu3SXoPfQK4rsgGgi-ibKl00eF60OdhaADE1fBZOZrU-0lA/exec";
+
+  function sendOrderToSheet(order) {
+    try {
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(order)
+      });
+    } catch (e) {
+      console.warn("Order post failed", e);
+    }
+  }
+
+  window.sendOrderToSheet = sendOrderToSheet; // expose for debugging
+
+  // Build order object and send
+  window.submitOrderDirect = function(amount){
+    // collect buyer details (if fields exist)
+    const name = (document.getElementById("os_name_field") && document.getElementById("os_name_field").value) || (document.getElementById("name") && document.getElementById("name").value) || "";
+    const phone = (document.getElementById("os_phone_field") && document.getElementById("os_phone_field").value) || (document.getElementById("phone") && document.getElementById("phone").value) || "";
+    const house = (document.getElementById("os_house") && document.getElementById("os_house").value) || "";
+    const street = (document.getElementById("os_street") && document.getElementById("os_street").value) || "";
+    const city = (document.getElementById("os_city") && document.getElementById("os_city").value) || "";
+    const pin = (document.getElementById("os_pin") && document.getElementById("os_pin").value) || "";
+
+    // prepare items array from cart (if exists)
+    let itemsArr = [];
+    try {
+      if (typeof cart !== "undefined" && Array.isArray(cart) && cart.length>0) {
+        cart.forEach(i=>{
+          itemsArr.push(`${i.name} (${i.weight}) x ${i.qty}`);
+        });
+      } else if (typeof os_current !== "undefined" && os_current.name && os_current.name !== "Multiple Items") {
+        itemsArr.push(`${os_current.name} (${os_current.weight}) x ${os_current.qty}`);
+      }
+    } catch (e){
+      console.warn("items build error", e);
+    }
+
+    const order = {
+      orderId: "ORD-" + Math.floor(1000 + Math.random()*9000),
+      name: name,
+      phone: phone,
+      house: house,
+      street: street,
+      city: city,
+      pin: pin,
+      items: itemsArr.join(" | "),
+      amount: amount || document.getElementById("cartSubtotal")?.innerText?.replace(/[^\d]/g,'') || 0,
+      timestamp: new Date().toLocaleString(),
+      source: window.location.pathname || "unknown"
+    };
+
+    // basic validation
+    if(!order.name || !order.phone){
+      // We'll still send but ask user to confirm
+      if(!confirm("Name or phone seems empty. Send order anyway?")) return;
+    }
+
+    // send
+    sendOrderToSheet(order);
+
+    // feedback + clear cart if available
+    try { cart = []; renderCart(); } catch(e){}
+    alert("Order placed! Thank you. You will be redirected to the home page.");
+    window.location.href = "success.html";
+  };
+
+  // override existing buyNow and continueCheckout by defining functions if not present
+  window.buyNow = window.buyNow || function(){ 
+    // compute subtotal similar to existing logic if possible
+    let subtotal = 0;
+    try {
+      if (typeof os_current !== "undefined") {
+        if (os_current.name === "Multiple Items") {
+          if (Array.isArray(cart)) {
+            cart.forEach(i=>{
+              const p = (typeof findProductPrice === 'function') ? findProductPrice(i.name) : (i.price||0);
+              const m = (i.name==="Methi Khakhra") ? (i.weight==="1kg"?2:1) : ({"250g":1,"500g":2,"1kg":4}[i.weight]||1);
+              subtotal += p * m * i.qty;
+            });
+          }
+        } else {
+          const unit = (os_current.unit || (typeof findProductPrice==='function' ? findProductPrice(os_current.name):0) )||0;
+          const m = (os_current.name==="Methi Khakhra") ? (os_current.weight==="1kg"?2:1) : ({"250g":1,"500g":2,"1kg":4}[os_current.weight]||1);
+          subtotal = unit * m * (os_current.qty||1);
+        }
+      }
+    } catch(e){ console.warn(e); }
+
+    window.submitOrderDirect(subtotal);
+  };
+
+  window.continueCheckout = window.continueCheckout || function(){
+    // compute subtotal from cart
+    let subtotal = 0;
+    try{
+      if (Array.isArray(cart) && cart.length>0){
+        cart.forEach(i=>{
+          const p = (typeof findProductPrice==='function') ? findProductPrice(i.name) : (i.price||0);
+          const m = (i.name==="Methi Khakhra") ? (i.weight==="1kg"?2:1) : ({"250g":1,"500g":2,"1kg":4}[i.weight]||1);
+          subtotal += p * m * i.qty;
+        });
+      }
+    }catch(e){console.warn(e);}
+    window.submitOrderDirect(subtotal);
+  };
+
+})(); 
+</script>
+
 </body>
 </html>

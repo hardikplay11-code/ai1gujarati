@@ -218,7 +218,8 @@ card.style.display = name.includes(term) ? 'block' : 'none';
           <option value="250g">250g</option>
           <option value="500g">500g</option>
         </select>
-        <button class="btn whatsapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
+        <button class="btn what
+sapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
         <button class="btn cart-btn" onclick="addCartFromCard(this.closest('.card'))">Add to Cart</button>
       </div>
     </div>
@@ -411,7 +412,8 @@ card.style.display = name.includes(term) ? 'block' : 'none';
     </div>
   </div>
 
-  <div style="margin-top:14px; display:flex; gap:10px;">
+  <div style="m
+argin-top:14px; display:flex; gap:10px;">
     <button class="btn cart-btn" style="flex:1;" onclick="addOrderToCart()">Add to Cart</button>
     <button class="btn whatsapp-btn" style="flex:1;" onclick="buyNow()">Buy Now</button>
   </div>
@@ -448,7 +450,14 @@ function openOrderSheetForCart(){ if(cart.length === 0) { openOrderSheet({ name:
 function closeOrderSheet(){ document.getElementById("orderSheet").classList.remove("show"); }
 function changeOrderQty(delta){ if(os_current.name === "Multiple Items") return; os_current.qty = Math.max(1, (parseInt(os_current.qty || 1,10) || 1) + delta); document.getElementById("os_qty").innerText = os_current.qty; computeOrderSheetPrice(); }
 document.addEventListener('change', function(e){ if(e.target && e.target.id === "os_weight_sel"){ os_current.weight = e.target.value; document.getElementById("os_weight").innerText = os_current.weight; computeOrderSheetPrice(); } });
-function computeOrderSheetPrice(){ let subtotal = 0; if(os_current.name === "Multiple Items"){ cart.forEach(i=>{ const p = findProductPrice(i.name); const m = weightMultipliers[i.weight] || 1; subtotal += p * m * i.qty; }); } else {const unit = os_current.unit || findProductPrice(os_current.name) || 0;
+function computeOrderSheetPrice(){ let subtotal = 0; if(os_current.name === "Multiple Items"){ cart.forEach(i=>{ const p = findProductPrice(i.name); let mult;
+if (i.name === "Methi Khakhra") {
+    mult = i.weight === "1kg" ? 2 : 1;  // SPECIAL RULE
+} else {
+    mult = weightMultipliers[i.weight] || 1;
+}
+subtotal += p * mult * i.qty;
+ }); } else {const unit = os_current.unit || findProductPrice(os_current.name) || 0;
     let mult;
 if (os_current.name === "Methi Khakhra") {
     mult = os_current.weight === "1kg" ? 2 : 1;
@@ -461,7 +470,20 @@ if (os_current.name === "Methi Khakhra") {
   document.getElementById("os_total").innerText = "₹" + subtotal;
 }
 function addOrderToCart(){ if(os_current.name === "Multiple Items"){ openCartSheet(); closeOrderSheet(); return; } const existing = cart.find(i => i.name === os_current.name && i.weight === os_current.weight); if(existing) existing.qty = existing.qty + (parseInt(os_current.qty || 1,10) || 1); else cart.push({ name: os_current.name, weight: os_current.weight, qty: parseInt(os_current.qty || 1,10) || 1 }); renderCart(); openCartSheet(); closeOrderSheet(); }
-function buyNow(){ const buyer = document.getElementById("os_name_field").value.trim(); const phone = document.getElementById("os_phone_field").value.trim(); if(!buyer || !phone){ alert("Please enter name and phone number."); return; } let itemsStr = ""; let amount = 0; if(os_current.name === "Multiple Items"){ itemsStr = cart.map(i=>`${i.name} (${i.weight}) × ${i.qty}`).join(" | "); cart.forEach(i=>{ const p = findProductPrice(i.name); const m = weightMultipliers[i.weight] || 1; amount += p * m * i.qty; }); } else { itemsStr = `${os_current.name} — ${os_current.weight} × ${os_current.qty}`; const unit = os_current.unit || findProductPrice(os_current.name) || 0; const m = weightMultipliers[os_current.weight] || 1; amount = unit * m * (parseInt(os_current.qty||1,10) || 1); } const data = { name: buyer, phone, items: itemsStr, amount, house: document.getElementById("os_house").value || "", street: document.getElementById("os_street").value || "", city: document.getElementById("os_city").value || "", pincode: document.getElementById("os_pin").value || "", timestamp: new Date().toISOString() }; fetch(APPS_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }); alert("Order submitted! We received your order."); closeOrderSheet(); }
+function buyNow(){ const buyer = document.getElementById("os_name_field").value.trim(); const phone = document.getElementById("os_phone_field").value.trim(); if(!buyer || !phone){ alert("Please enter name and phone number."); return; } let itemsStr = ""; let amount = 0; if(os_current.name === "Multiple Items"){ itemsStr = cart.map(i=>`${i.name} (${i.weight}) × ${i.qty}`).join(" | "); cart.forEach(i=>{ const p = findProductPrice(i.name); let mult;
+if (i.name === "Methi Khakhra") {
+    mult = i.weight === "1kg" ? 2 : 1;  // SPECIAL RULE
+} else {
+    mult = weightMultipliers[i.weight] || 1;
+}
+amount += p * mult * i.qty; }); } else { itemsStr = `${os_current.name} — ${os_current.weight} × ${os_current.qty}`; const unit = os_current.unit || findProductPrice(os_current.name) || 0; let mult;
+if (os_current.name === "Methi Khakhra") {
+    mult = os_current.weight === "1kg" ? 2 : 1;
+} else {
+    mult = weightMultipliers[os_current.weight] || 1;
+}
+subtotal = unit * mult * (parseInt(os_current.qty||1,10) || 1);
+ amount = unit * mult * (parseInt(os_current.qty||1,10) || 1); } const data = { name: buyer, phone, items: itemsStr, amount, house: document.getElementById("os_house").value || "", street: document.getElementById("os_street").value || "", city: document.getElementById("os_city").value || "", pincode: document.getElementById("os_pin").value || "", timestamp: new Date().toISOString() }; fetch(APPS_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }); alert("Order submitted! We received your order."); closeOrderSheet(); }
 function closeFullOrder(){ document.getElementById("fullOrderPage").style.display="none"; }
 function minimizeCartSheet(){ document.getElementById("cartSheet").classList.remove("show"); }
 

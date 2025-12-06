@@ -753,31 +753,61 @@ function addOrderToCart(){
 }
 
 /* Buy Now -> Submit directly (single product or multiple items) */
-function buyNow() {
-  let subtotal = 0;
-  if (os_current.name === "Multiple Items") {
-    cart.forEach(i => {
+function buyNow(){
+  // gather details
+  const buyer = document.getElementById("os_name_field").value.trim();
+  const phone = document.getElementById("os_phone_field").value.trim();
+
+  if(!buyer || !phone){
+    alert("Please enter name and phone number.");
+    return;
+  }
+
+  // prepare items and amount
+  let itemsStr = "";
+  let amount = 0;
+  if(os_current.name === "Multiple Items"){
+    itemsStr = cart.map(i=>`${i.name} (${i.weight}) × ${i.qty}`).join(" | ");
+    cart.forEach(i=>{
       const p = findProductPrice(i.name);
-      let m;
-      if (i.name === "Methi Khakhra") {
-        m = i.weight === "1kg" ? 2 : 1;
-      } else {
-        m = weightMultipliers[i.weight] || 1;
-      }
-      subtotal += p * m * i.qty;
+     
+      amount += p * m * i.qty;
     });
   } else {
+    itemsStr = `${os_current.name} — ${os_current.weight} × ${os_current.qty}`;
     const unit = os_current.unit || findProductPrice(os_current.name) || 0;
-    let m;
-    if (os_current.name === "Methi Khakhra") {
-      m = os_current.weight === "1kg" ? 2 : 1;
-    } else {
-      m = weightMultipliers[os_current.weight] || 1;
-    }
-    subtotal = unit * m * os_current.qty;
+    const m = weightMultipliers[os_current.weight] || 1;
+    amount = unit * m * (parseInt(os_current.qty||1,10) || 1);
   }
-  window.location.href = "payment.html?amount=" + subtotal;
+
+  const data = {
+    name: buyer,
+    phone,
+    items: itemsStr,
+    amount,
+    house: document.getElementById("os_house").value || "",
+    street: document.getElementById("os_street").value || "",
+    city: document.getElementById("os_city").value || "",
+    pincode: document.getElementById("os_pin").value || "",
+    timestamp: new Date().toISOString()
+  };
+
+  // send to Google Apps Script (no-cors)
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+
+  // success feedback
+  alert("Order submitted! We received your order.");
+  // close sheet
+  closeOrderSheet();
+  // optionally clear cart? we won't clear cart automatically — user may want to keep it
 }
+
+/* ------------------ Misc: continue using old popup kept for compatibility ------------------ */
 function closeFullOrder(){ document.getElementById("fullOrderPage").style.display="none"; }
 
 /* ------------------ initialize ------------------ */

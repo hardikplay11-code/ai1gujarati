@@ -599,7 +599,6 @@ function continueCheckout(){
 /* ------------------ ORDER SHEET (2C) functions ------------------ */
 
 let os_current = { name: "", weight: "500g", qty:1, unit:0 };
-
 function openOrderSheet(card){
   // card can be either a DOM card element OR product data object
   let name, weight, unit;
@@ -699,23 +698,38 @@ document.addEventListener('change', function(e){
 /* compute price for sheet */
 function computeOrderSheetPrice(){
   let subtotal = 0;
+
   if(os_current.name === "Multiple Items"){
-    // sum cart
+    // Sum cart items with special-case for Methi Khakhra
     cart.forEach(i=>{
       const p = findProductPrice(i.name);
-      const m = weightMultipliers[i.weight] || 1;
-      subtotal += p * m * i.qty;
+
+      // SPECIAL RULE: Methi Khakhra uses 500g = 1, 1kg = 2
+      let mult;
+      if(i.name === "Methi Khakhra"){
+        mult = i.weight === "1kg" ? 2 : 1;
+      } else {
+        // default mapping: 250g => 1, 500g => 2, 1kg => 4 (keeps current app logic)
+        mult = weightMultipliers[i.weight] || 1;
+      }
+
+      subtotal += p * mult * (parseInt(i.qty || 1, 10) || 1);
     });
+
   } else {
+    // Single product / order-sheet mode (non-multiple)
     const unit = os_current.unit || findProductPrice(os_current.name) || 0;
+
     let mult;
-if (os_current.name === "Methi Khakhra") {
-    mult = os_current.weight === "1kg" ? 2 : 1;
-} else {
-    mult = weightMultipliers[os_current.weight] || 1;
-}
-    subtotal = unit * mult * (parseInt(os_current.qty||1,10) || 1);
+    if(os_current.name === "Methi Khakhra"){
+      mult = os_current.weight === "1kg" ? 2 : 1;
+    } else {
+      mult = weightMultipliers[os_current.weight] || 1;
+    }
+
+    subtotal = unit * mult * (parseInt(os_current.qty || 1,10) || 1);
   }
+
   document.getElementById("os_line").innerText = "₹" + subtotal;
   document.getElementById("os_total").innerText = "₹" + subtotal;
 }
@@ -756,7 +770,7 @@ function buyNow(){
     itemsStr = cart.map(i=>`${i.name} (${i.weight}) × ${i.qty}`).join(" | ");
     cart.forEach(i=>{
       const p = findProductPrice(i.name);
-      const m = weightMultipliers[i.weight] || 1;
+     
       amount += p * m * i.qty;
     });
   } else {

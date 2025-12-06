@@ -505,7 +505,7 @@ function buyNow() {
   // Redirect to payment.html with amount
   window.location.href = "payment.html?amount=" + subtotal;
 }
- amount = unit * mult * (parseInt(os_current.qty||1,10) || 1); } const data = { name: buyer, phone, items: itemsStr, amount, house: document.getElementById("os_house").value || "", street: document.getElementById("os_street").value || "", city: document.getElementById("os_city").value || "", pincode: document.getElementById("os_pin").value || "", timestamp: new Date().toISOString() }; fetch(APPS_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }); alert("Order submitted! We received your order."); closeOrderSheet(); }
+// FIXED: removed broken leftover code
 function closeFullOrder(){ document.getElementById("fullOrderPage").style.display="none"; }
 function minimizeCartSheet(){ document.getElementById("cartSheet").classList.remove("show"); }
 

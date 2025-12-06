@@ -502,8 +502,8 @@ function buyNow() {
     subtotal = unit * m * os_current.qty;
   }
 
-  // Redirect to payment.html with amount
-  window.location.href = "payment.html?amount=" + subtotal;
+  // Redirect to  with amount
+  window.location.href = "?amount=" + subtotal;
 }
 // FIXED: removed broken leftover code
 function closeFullOrder(){ document.getElementById("fullOrderPage").style.display="none"; }

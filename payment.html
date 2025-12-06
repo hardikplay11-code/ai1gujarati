@@ -3,137 +3,133 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Confirm Payment - Ai1 Gujarati Snacks</title>
+  <title>Payment - Ai1 Gujarati Snacks</title>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #fff4e0;
-      padding: 20px;
-      color: #3a2e25;
-    }
-    .box {
-      max-width: 450px;
-      background: white;
-      margin: auto;
-      padding: 20px;
-      border-radius: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 15px;
-      background: #ff9933;
-      color: white;
-      border: none;
-      font-size: 18px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover {
-      opacity: 0.9;
-    }
-    .upi-img {
-      width: 100%;
-      border-radius: 10px;
-      margin: 10px 0;
-    }
+    body { font-family: 'Segoe UI', sans-serif; background:#fff4e0; padding:20px; margin:0; }
+    .box { max-width:480px; margin:0 auto; background:white; padding:20px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,0.12); }
+    h2 { text-align:center; color:#d65a00; }
+    .method { padding:14px; border:1px solid #ddd; border-radius:12px; margin-top:12px; cursor:pointer; }
+    .active { border-color:#ff9933; background:#fff6ef; }
+    #upiBox { display:none; margin-top:14px; text-align:center; }
+    #upiBox img { width:260px; border-radius:16px; }
+    button { width:100%; padding:16px; background:#ff9933; color:white; font-size:18px; font-weight:700; border:none; border-radius:12px; margin-top:20px; cursor:pointer; }
+    #amountBox { text-align:center; font-size:22px; font-weight:800; margin-top:10px; color:#3a2e25; }
   </style>
 </head>
+
 <body>
 
 <div class="box">
-  <h2>Confirm Your Payment</h2>
 
-  <p><strong>Order Amount:</strong> ₹<span id="amount"></span></p>
+  <h2>Choose Payment Method</h2>
 
-  <h3>Choose Payment Method:</h3>
+  <div id="amountBox">Amount: ₹<span id="payAmount">0</span></div>
 
-  <button onclick="selectMethod('COD')">Cash on Delivery (COD)</button>
+  <div id="cod" class="method" onclick="selectMethod('cod')">💵 Cash on Delivery</div>
+  <div id="upi" class="method" onclick="selectMethod('upi')">📱 UPI QR</div>
 
-  <h3>OR Pay Using UPI:</h3>
-  <img src="IMG-20251114-WA0000.jpg" class="upi-img" alt="UPI QR">
+  <div id="upiBox">
+    <p style="font-weight:700;">Scan & Pay</p>
 
-  <button onclick="selectMethod('UPI')">I Have Paid (UPI)</button>
+    <img src="IMG-20251114-WA0000.jpg" alt="UPI QR">
 
-  <button id="confirmBtn" onclick="confirmPayment()" style="display:none; background:#28a745;">Confirm Payment</button>
+    <p style="font-size:14px;">UPI ID: <b>7984090490@kotak811</b></p>
+
+    <input id="utr" placeholder="Enter UPI Transaction ID"
+           style="width:100%; padding:12px; margin-top:10px; border-radius:10px; border:1px solid #ccc;" />
+  </div>
+
+  <button onclick="confirmPayment()">Confirm Payment</button>
+
 </div>
 
-
 <script>
-// ------------------------------
-// READ URL ORDER DATA
-// ------------------------------
-let urlParams = new URLSearchParams(window.location.search);
-let amount = urlParams.get("amount");
-let orderDataRaw = urlParams.get("data");
+const APPS_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbxXGK5MY1jk4M8yBhQKEQjWu3SXoPfQK4rsgGgi-ibKl00eF60OdhaADE1fBZOZrU-0lA/exec";
 
-document.getElementById("amount").innerText = amount;
+// Read params
+let params = new URLSearchParams(window.location.search);
+let amount = params.get("amount") || 0;
+document.getElementById("payAmount").innerText = amount;
 
+// Safe load of order data (no error possible)
 let orderData = {};
 try {
-  orderData = JSON.parse(decodeURIComponent(orderDataRaw));
-} catch {
+  let raw = params.get("data");
+  if (raw && raw !== "null" && raw !== "") {
+    orderData = JSON.parse(decodeURIComponent(raw));
+  }
+} catch(e) {
   orderData = {};
 }
 
+// Default fields to avoid undefined errors
+orderData.name  = orderData.name  || "";
+orderData.phone = orderData.phone || "";
+orderData.house = orderData.house || "";
+orderData.street = orderData.street || "";
+orderData.city = orderData.city || "";
+orderData.pin = orderData.pin || "";
+orderData.cart = orderData.cart || [];
 
-// ------------------------------
-// PAYMENT METHOD SELECT
-// ------------------------------
-let selectedMethod = "";
+// ----------------------------------
+let method = "";
+function selectMethod(m){
+  method = m;
+  document.getElementById("cod").classList.remove("active");
+  document.getElementById("upi").classList.remove("active");
 
-function selectMethod(method) {
-  selectedMethod = method;
-  document.getElementById("confirmBtn").style.display = "block";
-  alert(method + " selected. Now click Confirm Payment.");
+  if(m === "cod"){
+    document.getElementById("cod").classList.add("active");
+    document.getElementById("upiBox").style.display = "none";
+  } else {
+    document.getElementById("upi").classList.add("active");
+    document.getElementById("upiBox").style.display = "block";
+  }
 }
+// ----------------------------------
 
+function confirmPayment(){
 
-// ------------------------------
-// SAVE ORDER TO GOOGLE SHEET + SEND EMAIL
-// ------------------------------
-function confirmPayment() {
-  if (!selectedMethod) {
-    alert("Please select payment method first.");
+  if(method === ""){
+    alert("Please select a payment method.");
     return;
   }
 
-  const finalOrder = {
-    orderId: "ORD-" + Math.floor(1000 + Math.random() * 9000),
-    name: orderData.name || "",
-    phone: orderData.phone || "",
-    house: orderData.house || "",
-    street: orderData.street || "",
-    city: orderData.city || "",
-    pin: orderData.pin || "",
-    items: JSON.stringify(orderData.cart || []),
-    amount: amount,
-    method: selectedMethod,
-    time: new Date().toLocaleString()
-  };
-
-  // ----------- SEND TO GOOGLE SHEET --------------
-  fetch(
-    "https://script.google.com/macros/s/AKfycbwBTRZg31Ay7QrLZpWNo8arWkDLIUk1jQmY8dtW8G-eO5o6aG9qZj_12345/exec",
-    {
-      method: "POST",
-      body: JSON.stringify(finalOrder),
+  let utr = "";
+  if(method === "upi"){
+    utr = document.getElementById("utr").value.trim();
+    if(!utr){
+      alert("Please enter UPI Transaction ID.");
+      return;
     }
-  );
+  }
 
-  // ----------- SEND EMAIL --------------
-  fetch(
-    "https://script.google.com/macros/s/AKfycbwLJ12345abcdEFGH/sendOrderEmail",
-    {
-      method: "POST",
-      body: JSON.stringify(finalOrder),
-    }
-  );
+  let orderId = "ORD-" + Math.floor(Math.random() * 9000 + 1000);
 
-  alert("Payment Confirmed! Your order has been placed.");
+  // SAFE FETCH (no crash possible)
+  fetch(APPS_SCRIPT_URL, {
+    method:"POST",
+    mode:"no-cors",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      orderId,
+      method,
+      utr,
+      amount,
+      name:orderData.name,
+      phone:orderData.phone,
+      house:orderData.house,
+      street:orderData.street,
+      city:orderData.city,
+      pin:orderData.pin,
+      items:JSON.stringify(orderData.cart),
+      timestamp:new Date().toISOString()
+    })
+  });
+
+  alert("Order Confirmed!\nOrder ID: " + orderId);
   window.location.href = "index.html";
 }
 </script>

@@ -1,172 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Payment | Ai1 Gujarati Snacks</title>
-
-<style>
-body {
-  font-family: 'Segoe UI', Arial;
-  background:#fff4e0;
-  margin:0;
-  padding:20px;
-  color:#3a2e25;
-}
-
-.box {
-  background:#fff;
-  padding:20px;
-  border-radius:16px;
-  box-shadow:0 4px 14px rgba(0,0,0,0.1);
-  margin-bottom:25px;
-}
-
-h2 {
-  text-align:center;
-  font-size:26px;
-  font-weight:800;
-  margin-bottom:10px;
-}
-
-.amount-box {
-  font-size:22px;
-  text-align:center;
-  background:#ffedd5;
-  padding:12px;
-  border-radius:12px;
-  font-weight:700;
-  margin-bottom:25px;
-}
-
-.btn {
-  width:100%;
-  padding:16px;
-  border:none;
-  border-radius:12px;
-  font-size:18px;
-  font-weight:700;
-  cursor:pointer;
-  margin-top:12px;
-}
-
-.cod-btn { background:#ff9933; color:white; }
-.upi-btn { background:#25d366; color:white; }
-.confirm-btn { background:#25d366; color:white; }
-
-.qr {
-  display:block;
-  width:260px;
-  height:260px;
-  margin:0 auto;
-  border-radius:12px;
-  object-fit:cover;
-  box-shadow:0 4px 14px rgba(0,0,0,0.15);
-}
-
-#successBox {
-  display:none;
-  padding:20px;
-  background:#d1fae5;
-  color:#065f46;
-  border-radius:12px;
-  text-align:center;
-  font-size:19px;
-  font-weight:600;
-  margin-top:20px;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment - Ai1 Gujarati Snacks</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background:#fff4e0; padding:20px; }
+    .box { max-width:480px; margin:0 auto; background:white; padding:20px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,0.12); }
+    h2 { text-align:center; color:#d65a00; }
+    .method { padding:14px; border:1px solid #ddd; border-radius:12px; margin-top:12px; cursor:pointer; }
+    .active { border-color:#ff9933; background:#fff6ef; }
+    #upiBox { display:none; margin-top:14px; text-align:center; }
+    #upiBox img { width:260px; border-radius:18px; }
+    button { width:100%; padding:14px; background:#ff9933; color:white; font-size:18px; font-weight:700; border:none; border-radius:12px; margin-top:20px; cursor:pointer; }
+    #amountBox { text-align:center; font-size:20px; font-weight:800; margin-top:10px; color:#3a2e25; }
+  </style>
 </head>
-
 <body>
 
-<h2>Complete Your Payment</h2>
-
-<div id="amountBox" class="amount-box">Amount: ₹0</div>
-
 <div class="box">
-  <h3 style="text-align:center; font-size:20px;">Pay Using UPI</h3>
+  <h2>Choose Payment Method</h2>
 
-  <img src="upi-qr.jpg" class="qr" alt="UPI QR">
+  <div id="amountBox">Amount: ₹<span id="payAmount">0</span></div>
 
-  <button class="btn confirm-btn" onclick="confirmPayment()">✅ I Have Paid</button>
+  <div id="cod" class="method" onclick="selectMethod('cod')">
+    💵 Cash on Delivery (COD)
+  </div>
+
+  <div id="upi" class="method" onclick="selectMethod('upi')">
+    📱 UPI QR (Scan & Pay)
+  </div>
+
+  <div id="upiBox">
+    <p style="font-weight:700;">Scan & Pay</p>
+    <img src="IMG-20251114-WA0000.jpg" alt="UPI QR">
+    <p style="margin-top:8px; font-size:14px;">UPI ID: <b>7984090490@kotak811</b></p>
+    <input id="utr" placeholder="Enter UPI Transaction ID" style="width:100%; padding:10px; margin-top:10px; border-radius:10px; border:1px solid #ccc;" />
+  </div>
+
+  <button onclick="confirmPayment()">Confirm Payment</button>
 </div>
-
-<div class="box">
-  <h3 style="text-align:center; font-size:20px;">Or Choose COD</h3>
-  <button class="btn cod-btn" onclick="submitCOD()">🚚 Cash on Delivery</button>
-</div>
-
-<div id="successBox"></div>
 
 <script>
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxXGK5MY1jk4M8yBhQKEQjWu3SXoPfQK4rsgGgi-ibKl00eF60OdhaADE1fBZOZrU-0lA/exec";
-
+let method = "";
 let amount = new URLSearchParams(window.location.search).get("amount") || 0;
-document.getElementById("amountBox").innerText = "Amount: ₹" + amount;
+document.getElementById("payAmount").innerText = amount;
 
-// ----------------------------
-// SHOW SUCCESS MESSAGE
-// ----------------------------
-function showSuccess(msg) {
-  const box = document.getElementById("successBox");
-  box.innerHTML = msg;
-  box.style.display = "block";
-  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+function selectMethod(m){
+  method = m;
+  document.getElementById("cod").classList.remove("active");
+  document.getElementById("upi").classList.remove("active");
+  if(m === 'cod'){
+    document.getElementById("cod").classList.add("active");
+    document.getElementById("upiBox").style.display = "none";
+  } else {
+    document.getElementById("upi").classList.add("active");
+    document.getElementById("upiBox").style.display = "block";
+  }
 }
 
-// ----------------------------
-// UPI CONFIRMATION
-// ----------------------------
-function confirmPayment() {
-  let orderId = "OD" + Date.now();
+function confirmPayment(){
+  if(method === ""){
+    alert("Please select a payment method.");
+    return;
+  }
 
-  fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      paymentConfirmed: true,
-      method: "UPI",
-      amount: amount,
-      orderId: orderId,
-      timestamp: new Date().toISOString()
-    })
-  });
+  if(method === "upi"){
+    const utr = document.getElementById("utr").value.trim();
+    if(!utr){ alert("Please enter UPI Transaction ID."); return; }
+  }
 
-  showSuccess(`
-    ✅ Payment Confirmed!<br><br>
-    🧾 Order ID: <b>${orderId}</b><br>
-    💰 Paid: <b>₹${amount}</b><br><br>
-    Thank you! Your order has been placed successfully.
-  `);
-}
-
-// ----------------------------
-// COD CONFIRMATION
-// ----------------------------
-function submitCOD() {
-  let orderId = "OD" + Date.now();
-
-  fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      paymentConfirmed: false,
-      method: "COD",
-      amount: amount,
-      orderId: orderId,
-      timestamp: new Date().toISOString()
-    })
-  });
-
-  showSuccess(`
-    🚚 COD Order Placed<br><br>
-    🧾 Order ID: <b>${orderId}</b><br>
-    💰 Amount: <b>₹${amount}</b><br><br>
-    Thank you! We will call you to confirm your address.
-  `);
+  alert("Payment confirmed! Your order is placed.");
+  window.location.href = "index.html";
 }
 </script>
 

@@ -473,39 +473,73 @@ if (os_current.name === "Methi Khakhra") {
   document.getElementById("os_total").innerText = "₹" + subtotal;
 }
 function addOrderToCart(){ if(os_current.name === "Multiple Items"){ openCartSheet(); closeOrderSheet(); return; } const existing = cart.find(i => i.name === os_current.name && i.weight === os_current.weight); if(existing) existing.qty = existing.qty + (parseInt(os_current.qty || 1,10) || 1); else cart.push({ name: os_current.name, weight: os_current.weight, qty: parseInt(os_current.qty || 1,10) || 1 }); renderCart(); openCartSheet(); closeOrderSheet(); }
-function buyNow() {
-  let subtotal = 0;
 
-  if (os_current.name === "Multiple Items") {
-    cart.forEach(i => {
-      const p = findProductPrice(i.name);
+function buyNow(){
+  const buyer = document.getElementById("os_name_field").value.trim();
+  const phone = document.getElementById("os_phone_field").value.trim();
 
-      let m;
-      if (i.name === "Methi Khakhra") {
-        m = i.weight === "1kg" ? 2 : 1;
-      } else {
-        m = weightMultipliers[i.weight] || 1;
-      }
-
-      subtotal += p * m * i.qty;
-    });
-  } else {
-    const unit = os_current.unit || findProductPrice(os_current.name) || 0;
-
-    let m;
-    if (os_current.name === "Methi Khakhra") {
-      m = os_current.weight === "1kg" ? 2 : 1;
-    } else {
-      m = weightMultipliers[os_current.weight] || 1;
-    }
-
-    subtotal = unit * m * os_current.qty;
+  if(!buyer || !phone){
+    alert("Please enter name and phone number.");
+    return;
   }
 
-  // Redirect to payment.html with amount
-  window.location.href = "payment.html?amount=" + subtotal;
+  let itemsStr = "";
+  let amount = 0;
+
+  if(os_current.name === "Multiple Items"){
+    itemsStr = cart.map(i=>`${i.name} (${i.weight}) × ${i.qty}`).join(" | ");
+
+    cart.forEach(i=>{
+      const p = findProductPrice(i.name);
+
+      let mult;
+      if(i.name === "Methi Khakhra"){
+        mult = i.weight === "1kg" ? 2 : 1;
+      } else {
+        mult = weightMultipliers[i.weight] || 1;
+      }
+
+      amount += p * mult * i.qty;
+    });
+
+  } else {
+    itemsStr = `${os_current.name} — ${os_current.weight} × ${os_current.qty}`;
+
+    let mult;
+    if(os_current.name === "Methi Khakhra"){
+      mult = os_current.weight === "1kg" ? 2 : 1;
+    } else {
+      mult = weightMultipliers[os_current.weight] || 1;
+    }
+
+    const unit = os_current.unit || findProductPrice(os_current.name);
+    amount = unit * mult * os_current.qty;
+  }
+
+  const data = {
+    name: buyer,
+    phone,
+    items: itemsStr,
+    amount,
+    house: document.getElementById("os_house").value || "",
+    street: document.getElementById("os_street").value || "",
+    city: document.getElementById("os_city").value || "",
+    pincode: document.getElementById("os_pin").value || "",
+    timestamp: new Date().toISOString()
+  };
+
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+
+  alert("Order submitted! We received your order.");
+  closeOrderSheet();
 }
-// FIXED: removed broken leftover code
+
+
 function closeFullOrder(){ document.getElementById("fullOrderPage").style.display="none"; }
 function minimizeCartSheet(){ document.getElementById("cartSheet").classList.remove("show"); }
 

@@ -771,7 +771,13 @@ function buyNow(){
     cart.forEach(i=>{
       const p = findProductPrice(i.name);
      
-      amount += p * m * i.qty;
+      let mult;
+      if(i.name === "Methi Khakhra"){
+          mult = i.weight === "1kg" ? 2 : 1;
+      } else {
+          mult = weightMultipliers[i.weight] || 1;
+      }
+      amount += p * mult * i.qty;
     });
   } else {
     itemsStr = `${os_current.name} — ${os_current.weight} × ${os_current.qty}`;
@@ -825,6 +831,5 @@ document.addEventListener('DOMContentLoaded', function(){
 <script src="main-cart.js"></script>
 
 </html>
-
 
 

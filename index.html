@@ -798,7 +798,6 @@ function buyNow(){
     timestamp: new Date().toISOString()
   };
 
-  // send to Google Apps Script (no-cors)
   fetch(APPS_SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
@@ -806,15 +805,13 @@ function buyNow(){
     body: JSON.stringify(data)
   });
 
-  // success feedback
   alert("Order submitted! We received your order.");
-  // close sheet
   closeOrderSheet();
-  // optionally clear cart? we won't clear cart automatically — user may want to keep it
 }
 
-/* ------------------ Misc: continue using old popup kept for compatibility ------------------ */
+
 function closeFullOrder(){ document.getElementById("fullOrderPage").style.display="none"; }
+function minimizeCartSheet(){ document.getElementById("cartSheet").classList.remove("show"); }
 
 /* ------------------ initialize ------------------ */
 document.addEventListener('DOMContentLoaded', function(){
@@ -831,5 +828,6 @@ document.addEventListener('DOMContentLoaded', function(){
 <script src="main-cart.js"></script>
 
 </html>
+
 
 

@@ -889,14 +889,15 @@ function submitReview(){
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        name: name,
-        review: review,
-        rating: rating,
+        name,
+        review,
+        rating,
         image: reader.result
       })
     })
-    .then(res => res.json())
-    .then(() => {
+    .then(res => res.text())
+    .then(txt => {
+      console.log("Server response:", txt);
       alert("Review submitted! Awaiting admin approval.");
       revName.value = "";
       revText.value = "";
@@ -904,13 +905,14 @@ function submitReview(){
       setRating(0);
     })
     .catch(err => {
-      alert("Submission failed. Check script URL.");
       console.error(err);
+      alert("Submission failed. Open console.");
     });
   };
 
   reader.readAsDataURL(imgFile);
 }
+
 
 
 function loadReviews(){

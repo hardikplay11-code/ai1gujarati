@@ -885,19 +885,16 @@ function submitReview(){
   reader.onload = function(){
     fetch(REVIEW_API, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
       body: JSON.stringify({
-        name,
-        review,
-        rating,
+        name: name,
+        review: review,
+        rating: rating,
         image: reader.result
       })
     })
     .then(res => res.text())
     .then(txt => {
-      console.log("Server response:", txt);
+      console.log("GAS:", txt);
       alert("Review submitted! Awaiting admin approval.");
       revName.value = "";
       revText.value = "";
@@ -905,15 +902,13 @@ function submitReview(){
       setRating(0);
     })
     .catch(err => {
-      console.error(err);
-      alert("Submission failed. Open console.");
+      console.error("Fetch error:", err);
+      alert("Submission failed. Check script URL.");
     });
   };
 
   reader.readAsDataURL(imgFile);
 }
-
-
 
 function loadReviews(){
   fetch(REVIEW_API)
@@ -954,3 +949,4 @@ document.addEventListener('DOMContentLoaded', function(){
 <script src="main-cart.js"></script>
 
 </html>
+

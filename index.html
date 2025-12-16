@@ -411,6 +411,19 @@ style="
 
   </div>
 </section>
+  <form id="reviewForm"
+  action="https://script.google.com/macros/s/AKfycbwqK51FZm2cIqB13684n0og1mL63PJvpOJ-vIqw4AjdQRKyN7hTn3cMhGGhDrgvPUEi/exec"
+  method="POST"
+  target="hiddenFrame"
+  style="display:none;">
+  <input name="name" id="f_name">
+  <input name="review" id="f_review">
+  <input name="rating" id="f_rating">
+  <input name="image" id="f_image">
+</form>
+
+<iframe name="hiddenFrame" style="display:none;"></iframe>
+
 
 </main>
 
@@ -861,7 +874,7 @@ function minimizeCartSheet(){ document.getElementById("cartSheet").classList.rem
 
 /* ===== CUSTOMER REVIEW SCRIPT (GOOGLE SHEET APPROVAL) ===== */
 let selectedRating = 0;
-const REVIEW_API = "https://script.google.com/macros/s/AKfycbwCmwWhFvCwBqWa0nveppKw7EY2St2uFmU_u2oL-ePhgfA2Bp72GH59QGgB-grEd5Fm/exec";
+const REVIEW_API = "https://script.google.com/macros/s/AKfycbwqK51FZm2cIqB13684n0og1mL63PJvpOJ-vIqw4AjdQRKyN7hTn3cMhGGhDrgvPUEi/exec";
 
 function setRating(r){
   selectedRating = r;
@@ -869,45 +882,30 @@ function setRating(r){
     s.textContent = i < r ? "★" : "☆";
   });
 }
-
 function submitReview(){
-  const name = revName.value.trim();
-  const review = revText.value.trim();
-  const rating = selectedRating;
-  const imgFile = revImage.files[0];
-
-  if(!name || !review || rating === 0){
+  if(!revName.value || !revText.value || selectedRating === 0){
     alert("Please fill all fields & rating");
     return;
   }
 
   const reader = new FileReader();
   reader.onload = function(){
-    fetch(REVIEW_API, {
-      method: "POST",
-      body: JSON.stringify({
-        name: name,
-        review: review,
-        rating: rating,
-        image: reader.result
-      })
-    })
-    .then(res => res.text())
-    .then(txt => {
-      console.log("GAS:", txt);
-      alert("Review submitted! Awaiting admin approval.");
-      revName.value = "";
-      revText.value = "";
-      revImage.value = "";
-      setRating(0);
-    })
-    .catch(err => {
-      console.error("Fetch error:", err);
-      alert("Submission failed. Check script URL.");
-    });
+    f_name.value = revName.value;
+    f_review.value = revText.value;
+    f_rating.value = selectedRating;
+    f_image.value = reader.result;
+
+    document.getElementById("reviewForm").submit();
+
+    alert("Review submitted! Awaiting admin approval.");
+
+    revName.value = "";
+    revText.value = "";
+    revImage.value = "";
+    setRating(0);
   };
 
-  reader.readAsDataURL(imgFile);
+  reader.readAsDataURL(revImage.files[0]);
 }
 
 function loadReviews(){
@@ -949,5 +947,6 @@ document.addEventListener('DOMContentLoaded', function(){
 <script src="main-cart.js"></script>
 
 </html>
+
 
 

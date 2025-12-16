@@ -861,7 +861,7 @@ function minimizeCartSheet(){ document.getElementById("cartSheet").classList.rem
 
 /* ===== CUSTOMER REVIEW SCRIPT (GOOGLE SHEET APPROVAL) ===== */
 let selectedRating = 0;
-const REVIEW_API = "https://script.google.com/macros/s/AKfycbwCmwWhFvCwBqWa0nveppKw7EY2St2uFmU_u2oL-ePhgfA2Bp72GH59QGgB-grEd5Fm/exec ";
+const REVIEW_API = "https://script.google.com/macros/s/AKfycbwCmwWhFvCwBqWa0nveppKw7EY2St2uFmU_u2oL-ePhgfA2Bp72GH59QGgB-grEd5Fm/exec";
 
 function setRating(r){
   selectedRating = r;
@@ -885,22 +885,33 @@ function submitReview(){
   reader.onload = function(){
     fetch(REVIEW_API, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
-        name,
-        review,
-        rating,
+        name: name,
+        review: review,
+        rating: rating,
         image: reader.result
       })
-    }).then(()=>{
-      alert("Review submitted. Awaiting admin approval.");
+    })
+    .then(res => res.json())
+    .then(() => {
+      alert("Review submitted! Awaiting admin approval.");
       revName.value = "";
       revText.value = "";
       revImage.value = "";
       setRating(0);
+    })
+    .catch(err => {
+      alert("Submission failed. Check script URL.");
+      console.error(err);
     });
   };
+
   reader.readAsDataURL(imgFile);
 }
+
 
 function loadReviews(){
   fetch(REVIEW_API)

@@ -856,6 +856,14 @@ function minimizeCartSheet(){ document.getElementById("cartSheet").classList.rem
 
 /* ===== CUSTOMER REVIEW SCRIPT ===== */
 const REVIEW_API = "https://script.google.com/macros/s/AKfycbwCmwWhFvCwBqWa0nveppKw7EY2St2uFmU_u2oL-ePhgfA2Bp72GH59QGgB-grEd5Fm/exec";
+let selectedRating = 0;
+
+function setRating(r){
+  selectedRating = r;
+  document.querySelectorAll("#starRating span").forEach((s,i)=>{
+    s.textContent = i < r ? "★" : "☆";
+  });
+}
 
 function submitReview(){
   const name = revName.value.trim();
@@ -921,4 +929,5 @@ document.addEventListener('DOMContentLoaded', function(){
 <script src="main-cart.js"></script>
 
 </html>
+
 

@@ -327,33 +327,29 @@ style="
 </section>
 
 <!-- ===================== CUSTOMER REVIEWS (UPLOAD) ===================== -->
-<section id="reviews" style="padding:50px 20px; background:#fff;">
+<section style="padding:50px 20px; background:white;">
   <h2 style="text-align:center; font-size:28px; font-weight:800; color:#d65a00;">
-    Customer Reviews
+    What Our Customers Say
   </h2>
 
-  <div style="max-width:600px; margin:30px auto; background:#fff4e0; padding:20px; border-radius:16px;">
-    <input id="revName" placeholder="Your Name" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;">
-    <textarea id="revText" placeholder="Write your review..." rows="3"
-      style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;"></textarea>
-
-    <div id="starRating" style="font-size:26px; margin-bottom:10px;">
-      <span onclick="setRating(1)">☆</span>
-      <span onclick="setRating(2)">☆</span>
-      <span onclick="setRating(3)">☆</span>
-      <span onclick="setRating(4)">☆</span>
-      <span onclick="setRating(5)">☆</span>
+  <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-top:30px;">
+    
+    <div style="background:#fff4e0; padding:20px; border-radius:14px; width:260px;">
+      <p>“Best Methi Khakhra I ever tasted! Very crispy and fresh.”</p>
+      <strong>- Harshil</strong>
     </div>
 
-    <input type="file" id="revImage" accept="image/*" style="margin-bottom:10px;">
+    <div style="background:#fff4e0; padding:20px; border-radius:14px; width:260px;">
+      <p>“Bhakharvadi was amazing! Perfect balance of sweet & spicy.”</p>
+      <strong>- Priya</strong>
+    </div>
 
-    <button onclick="submitReview()" 
-      style="width:100%; padding:12px; background:#ff9933; color:white; font-weight:700; border:none; border-radius:10px;">
-      Submit Review
-    </button>
+    <div style="background:#fff4e0; padding:20px; border-radius:14px; width:260px;">
+      <p>“Delivery was fast & packaging was neat. Highly recommend!”</p>
+      <strong>- Mehul</strong>
+    </div>
+
   </div>
-
-  <div id="reviewList" style="display:flex; gap:20px; flex-wrap:wrap; justify-content:center;"></div>
 </section>
 
 <div style="text-align:center; margin: 30px 0;">
@@ -855,7 +851,7 @@ function minimizeCartSheet(){ document.getElementById("cartSheet").classList.rem
 /* ------------------ initialize ------------------ */
 
 /* ===== CUSTOMER REVIEW SCRIPT ===== */
-const REVIEW_API = "https://script.google.com/macros/s/AKfycbyN-zRftnl3N80ulSs3ufNRov5bMc-q5esK2QZo0xycS4RukZlvkL5oPcyi137tdNpR/exec";
+const REVIEW_API = "https://script.google.com/macros/s/AKfycbxgyM0GRYnt3dgU22ADxVTZR0PBiFE9WZFD7DCaxXrOlW3dshsiUwrsB5jeNci3JVeh/exec";
 let selectedRating = 0;
 
 function setRating(r){
@@ -922,4 +918,5 @@ document.addEventListener('DOMContentLoaded', function(){
 <script src="main-cart.js"></script>
 
 </html>
+
 

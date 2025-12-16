@@ -855,55 +855,55 @@ function minimizeCartSheet(){ document.getElementById("cartSheet").classList.rem
 /* ------------------ initialize ------------------ */
 
 /* ===== CUSTOMER REVIEW SCRIPT ===== */
-let selectedRating = 0;
-
-function setRating(r){
-  selectedRating = r;
-  document.querySelectorAll("#starRating span").forEach((s,i)=>{
-    s.textContent = i < r ? "★" : "☆";
-  });
-}
+const REVIEW_API = "https://script.google.com/macros/s/AKfycbwCmwWhFvCwBqWa0nveppKw7EY2St2uFmU_u2oL-ePhgfA2Bp72GH59QGgB-grEd5Fm/exec";
 
 function submitReview(){
   const name = revName.value.trim();
-  const text = revText.value.trim();
+  const review = revText.value.trim();
+  const rating = selectedRating;
   const imgFile = revImage.files[0];
 
-  if(!name || !text || selectedRating === 0){
-    alert("Please fill all fields & rating");
+  if(!name || !review || rating === 0){
+    alert("Fill all fields");
     return;
   }
 
   const reader = new FileReader();
   reader.onload = function(){
-    const review = { name, text, rating: selectedRating, img: reader.result };
-    const reviews = JSON.parse(localStorage.getItem("reviews") || "[]");
-    reviews.push(review);
-    localStorage.setItem("reviews", JSON.stringify(reviews));
-    revName.value = ""; revText.value = ""; revImage.value = ""; setRating(0);
-    loadReviews();
+    fetch(REVIEW_API, {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        review,
+        rating,
+        image: reader.result
+      })
+    })
+    .then(()=> alert("Review submitted. Awaiting approval."));
   };
-  if(imgFile) reader.readAsDataURL(imgFile);
+
+  reader.readAsDataURL(imgFile);
 }
 
 function loadReviews(){
-  const box = document.getElementById("reviewList");
-  if(!box) return;
-  box.innerHTML = "";
-  const reviews = JSON.parse(localStorage.getItem("reviews") || "[]");
-  reviews.forEach(r=>{
-    box.innerHTML += `
-      <div style="width:260px; background:#fff4e0; padding:16px; border-radius:14px;">
-        <img src="${r.img}" style="width:100%; height:160px; object-fit:cover; border-radius:10px;">
-        <div style="margin-top:8px; font-size:18px; color:#ff9933;">
-          ${"★".repeat(r.rating)}${"☆".repeat(5-r.rating)}
-        </div>
-        <p style="margin:6px 0;">"${r.text}"</p>
-        <strong>- ${r.name}</strong>
-      </div>
-    `;
-  });
+  fetch(REVIEW_API)
+    .then(r => r.json())
+    .then(data => {
+      const box = document.getElementById("reviewList");
+      box.innerHTML = "";
+      data.forEach(r=>{
+        box.innerHTML += `
+          <div style="width:260px; background:#fff4e0; padding:16px; border-radius:14px;">
+            <img src="${r.image}" style="width:100%; height:160px; object-fit:cover; border-radius:10px;">
+            <div style="color:#ff9933">${"★".repeat(r.rating)}</div>
+            <p>"${r.review}"</p>
+            <strong>- ${r.name}</strong>
+          </div>
+        `;
+      });
+    });
 }
+
 /* ===== END CUSTOMER REVIEW SCRIPT ===== */
 
 document.addEventListener('DOMContentLoaded', function(){
@@ -921,3 +921,4 @@ document.addEventListener('DOMContentLoaded', function(){
 <script src="main-cart.js"></script>
 
 </html>
+

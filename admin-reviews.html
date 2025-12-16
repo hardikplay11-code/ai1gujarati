@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin – Reviews</title>
+<style>
+body{font-family:Arial;background:#fff4e0;padding:20px;}
+.card{background:white;padding:15px;border-radius:12px;margin-bottom:15px;}
+button{padding:8px 12px;border:none;border-radius:8px;cursor:pointer;font-weight:700;}
+.approve{background:#25d366;color:white;}
+.delete{background:#ff4d4d;color:white;margin-left:8px;}
+</style>
+</head>
+<body>
+
+<h2>🛠 Review Admin Panel</h2>
+<div id="list"></div>
+
+<script>
+const PASSWORD = "admin123"; // CHANGE THIS
+if(prompt("Admin password") !== PASSWORD) document.body.innerHTML="";
+
+const API = "https://script.google.com/macros/s/AKfycbxdqd6K_R9jO25rlp1ONtdQADNPm8VZ4CkDhE548eOMqFeT_r67Dm7t5Oqx2coMyL5g/exec";
+
+function load(){
+  fetch(API + "?action=admin")
+    .then(r => r.json())
+    .then(data => {
+      list.innerHTML = "";
+      data.forEach(r => {
+        list.innerHTML += `
+          <div class="card">
+            ${r.img ? `<img src="${r.img}" style="width:120px;border-radius:10px;">` : ""}
+            <h4>${r.name}</h4>
+            ⭐ ${r.rating}
+            <p>${r.text}</p>
+            <p>Status: ${r.approved}</p>
+            <button class="approve" onclick="approve(${r.row})">Approve</button>
+            <button class="delete" onclick="del(${r.row})">Delete</button>
+          </div>
+        `;
+      });
+    });
+}
+
+function approve(row){
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({ action: "approve", row })
+  }).then(load);
+}
+
+function del(row){
+  if(!confirm("Delete this review?")) return;
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({ action: "delete", row })
+  }).then(load);
+}
+
+load();
+</script>
+</body>
+</html>

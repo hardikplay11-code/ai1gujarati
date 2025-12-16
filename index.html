@@ -323,9 +323,41 @@ style="
       </div>
     </div>
 
-  </section>
+  
+</section>
+
+<!-- ===================== CUSTOMER REVIEWS (UPLOAD) ===================== -->
+<section id="reviews" style="padding:50px 20px; background:#fff;">
+  <h2 style="text-align:center; font-size:28px; font-weight:800; color:#d65a00;">
+    Customer Reviews
+  </h2>
+
+  <div style="max-width:600px; margin:30px auto; background:#fff4e0; padding:20px; border-radius:16px;">
+    <input id="revName" placeholder="Your Name" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;">
+    <textarea id="revText" placeholder="Write your review..." rows="3"
+      style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;"></textarea>
+
+    <div id="starRating" style="font-size:26px; margin-bottom:10px;">
+      <span onclick="setRating(1)">☆</span>
+      <span onclick="setRating(2)">☆</span>
+      <span onclick="setRating(3)">☆</span>
+      <span onclick="setRating(4)">☆</span>
+      <span onclick="setRating(5)">☆</span>
+    </div>
+
+    <input type="file" id="revImage" accept="image/*" style="margin-bottom:10px;">
+
+    <button onclick="submitReview()" 
+      style="width:100%; padding:12px; background:#ff9933; color:white; font-weight:700; border:none; border-radius:10px;">
+      Submit Review
+    </button>
+  </div>
+
+  <div id="reviewList" style="display:flex; gap:20px; flex-wrap:wrap; justify-content:center;"></div>
+</section>
 
 <div style="text-align:center; margin: 30px 0;">
+
   <a href="products.html"
  style="
       display:inline-block;
@@ -522,6 +554,7 @@ function addCartFromCard(card){
   else cart.push({ name, weight, qty:1 });
 
   renderCart();
+  loadReviews();
   openCartSheet();
 }
 
@@ -583,11 +616,13 @@ function changeCartQty(i, d){
   cart[i].qty = Math.max(1, (parseInt(cart[i].qty||1,10) || 1) + d);
   document.getElementById(`cart-qty-${i}`).innerText = cart[i].qty;
   renderCart();
+  loadReviews();
 }
 
 function removeCartItem(i){
   cart.splice(i,1);
   renderCart();
+  loadReviews();
 }
 
 function continueCheckout(){
@@ -747,6 +782,7 @@ function addOrderToCart(){
   else cart.push({ name: os_current.name, weight: os_current.weight, qty: parseInt(os_current.qty || 1,10) || 1 });
 
   renderCart();
+  loadReviews();
   // feedback & close
   openCartSheet();
   closeOrderSheet();
@@ -807,6 +843,7 @@ function buyNow(){
 
 cart = [];
 renderCart();
+  loadReviews();
   alert("Order submitted! We received your order.");
   closeOrderSheet();
 }
@@ -816,8 +853,82 @@ function closeFullOrder(){ document.getElementById("fullOrderPage").style.displa
 function minimizeCartSheet(){ document.getElementById("cartSheet").classList.remove("show"); }
 
 /* ------------------ initialize ------------------ */
+
+/* ===== CUSTOMER REVIEW SCRIPT ===== */
+const REVIEW_API = "https://script.google.com/macros/s/AKfycbxdqd6K_R9jO25rlp1ONtdQADNPm8VZ4CkDhE548eOMqFeT_r67Dm7t5Oqx2coMyL5g/exec";
+
+let selectedRating = 0;
+
+function setRating(r){
+  selectedRating = r;
+  document.querySelectorAll("#starRating span").forEach((s,i)=>{
+    s.textContent = i < r ? "★" : "☆";
+  });
+}
+
+function submitReview(){
+  const name = revName.value.trim();
+  const text = revText.value.trim();
+  const imgFile = revImage.files[0];
+
+  if(!name || !text || selectedRating === 0){
+    alert("Please fill all fields & rating");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(){
+    fetch(REVIEW_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "add",
+        name,
+        rating: selectedRating,
+        text,
+        img: reader.result
+      })
+    });
+
+    alert("Review submitted! Pending approval.");
+    revName.value = "";
+    revText.value = "";
+    revImage.value = "";
+    setRating(0);
+  };
+
+  if(imgFile) reader.readAsDataURL(imgFile);
+}
+
+
+function loadReviews(){
+  fetch(REVIEW_API + "?action=list")
+    .then(res => res.json())
+    .then(reviews => {
+      const box = document.getElementById("reviewList");
+      if(!box) return;
+      box.innerHTML = "";
+
+      reviews.forEach(r => {
+        box.innerHTML += `
+          <div style="width:260px; background:#fff4e0; padding:16px; border-radius:14px;">
+            ${r.img ? `<img src="${r.img}" style="width:100%; height:160px; object-fit:cover; border-radius:10px;">` : ""}
+            <div style="margin-top:8px; font-size:18px; color:#ff9933;">
+              ${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}
+            </div>
+            <p>"${r.text}"</p>
+            <strong>- ${r.name}</strong>
+          </div>
+        `;
+      });
+    });
+}
+
+/* ===== END CUSTOMER REVIEW SCRIPT ===== */
+
 document.addEventListener('DOMContentLoaded', function(){
   renderCart();
+  loadReviews();
 });
 
 </script>
@@ -830,4 +941,3 @@ document.addEventListener('DOMContentLoaded', function(){
 <script src="main-cart.js"></script>
 
 </html>
-

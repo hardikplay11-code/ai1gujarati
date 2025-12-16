@@ -555,6 +555,7 @@ function addCartFromCard(card){
 
   renderCart();
   loadReviews();
+  loadReviews();
   openCartSheet();
 }
 
@@ -617,11 +618,13 @@ function changeCartQty(i, d){
   document.getElementById(`cart-qty-${i}`).innerText = cart[i].qty;
   renderCart();
   loadReviews();
+  loadReviews();
 }
 
 function removeCartItem(i){
   cart.splice(i,1);
   renderCart();
+  loadReviews();
   loadReviews();
 }
 
@@ -783,6 +786,7 @@ function addOrderToCart(){
 
   renderCart();
   loadReviews();
+  loadReviews();
   // feedback & close
   openCartSheet();
   closeOrderSheet();
@@ -844,6 +848,7 @@ function buyNow(){
 cart = [];
 renderCart();
   loadReviews();
+  loadReviews();
   alert("Order submitted! We received your order.");
   closeOrderSheet();
 }
@@ -854,9 +859,9 @@ function minimizeCartSheet(){ document.getElementById("cartSheet").classList.rem
 
 /* ------------------ initialize ------------------ */
 
-/* ===== CUSTOMER REVIEW SCRIPT ===== */
-const REVIEW_API = "https://script.google.com/macros/s/AKfycbwCmwWhFvCwBqWa0nveppKw7EY2St2uFmU_u2oL-ePhgfA2Bp72GH59QGgB-grEd5Fm/exec";
+/* ===== CUSTOMER REVIEW SCRIPT (GOOGLE SHEET APPROVAL) ===== */
 let selectedRating = 0;
+const REVIEW_API = "https://script.google.com/macros/s/AKfycbwCmwWhFvCwBqWa0nveppKw7EY2St2uFmU_u2oL-ePhgfA2Bp72GH59QGgB-grEd5Fm/exec ";
 
 function setRating(r){
   selectedRating = r;
@@ -872,7 +877,7 @@ function submitReview(){
   const imgFile = revImage.files[0];
 
   if(!name || !review || rating === 0){
-    alert("Fill all fields");
+    alert("Please fill all fields & rating");
     return;
   }
 
@@ -886,10 +891,14 @@ function submitReview(){
         rating,
         image: reader.result
       })
-    })
-    .then(()=> alert("Review submitted. Awaiting approval."));
+    }).then(()=>{
+      alert("Review submitted. Awaiting admin approval.");
+      revName.value = "";
+      revText.value = "";
+      revImage.value = "";
+      setRating(0);
+    });
   };
-
   reader.readAsDataURL(imgFile);
 }
 
@@ -898,24 +907,27 @@ function loadReviews(){
     .then(r => r.json())
     .then(data => {
       const box = document.getElementById("reviewList");
+      if(!box) return;
       box.innerHTML = "";
       data.forEach(r=>{
         box.innerHTML += `
           <div style="width:260px; background:#fff4e0; padding:16px; border-radius:14px;">
             <img src="${r.image}" style="width:100%; height:160px; object-fit:cover; border-radius:10px;">
-            <div style="color:#ff9933">${"★".repeat(r.rating)}</div>
-            <p>"${r.review}"</p>
+            <div style="margin-top:8px; font-size:18px; color:#ff9933;">
+              ${"★".repeat(r.rating)}
+            </div>
+            <p style="margin:6px 0;">"${r.review}"</p>
             <strong>- ${r.name}</strong>
           </div>
         `;
       });
     });
 }
-
 /* ===== END CUSTOMER REVIEW SCRIPT ===== */
 
 document.addEventListener('DOMContentLoaded', function(){
   renderCart();
+  loadReviews();
   loadReviews();
 });
 
@@ -929,5 +941,3 @@ document.addEventListener('DOMContentLoaded', function(){
 <script src="main-cart.js"></script>
 
 </html>
-
-

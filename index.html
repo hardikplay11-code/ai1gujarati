@@ -355,7 +355,18 @@ style="
 
   <div id="reviewList" style="display:flex; gap:20px; flex-wrap:wrap; justify-content:center;"></div>
 </section>
+  <form id="reviewForm"
+  action="https://script.google.com/macros/s/AKfycbzfS7EDKswEnKEfoDUFZ1ltCbgw7RhrtiZXSTgTLJWk5VfhO0AhuEyof5skRipLdkff/exec"
+  method="POST"
+  target="hiddenFrame"
+  style="display:none;">
+  <input name="name" id="f_name">
+  <input name="review" id="f_review">
+  <input name="rating" id="f_rating">
+  <input name="image" id="f_image">
+</form>
 
+<iframe name="hiddenFrame" style="display:none;"></iframe>
 <div style="text-align:center; margin: 30px 0;">
 
   <a href="products.html"
@@ -411,19 +422,6 @@ style="
 
   </div>
 </section>
-  <form id="reviewForm"
-  action="https://script.google.com/macros/s/AKfycbzfS7EDKswEnKEfoDUFZ1ltCbgw7RhrtiZXSTgTLJWk5VfhO0AhuEyof5skRipLdkff/exec"
-  method="POST"
-  target="hiddenFrame"
-  style="display:none;">
-  <input name="name" id="f_name">
-  <input name="review" id="f_review">
-  <input name="rating" id="f_rating">
-  <input name="image" id="f_image">
-</form>
-
-<iframe name="hiddenFrame" style="display:none;"></iframe>
-
 
 </main>
 
@@ -947,6 +945,7 @@ document.addEventListener('DOMContentLoaded', function(){
 <script src="main-cart.js"></script>
 
 </html>
+
 
 
 

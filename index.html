@@ -913,21 +913,30 @@ function loadReviews(){
       const box = document.getElementById("reviewList");
       if(!box) return;
       box.innerHTML = "";
-      data.forEach(r=>{
+
+      data.forEach(r => {
         box.innerHTML += `
           <div style="width:260px; background:#fff4e0; padding:16px; border-radius:14px;">
-            <img src="${r.image}" style="width:100%; height:160px; object-fit:cover; border-radius:10px;">
+
+            ${r.image ? `
+              <img src="${r.image}"
+                   style="width:100%; height:160px; object-fit:cover; border-radius:10px;">
+            ` : ``}
+
             <div style="margin-top:8px; font-size:18px; color:#ff9933;">
-              ${"★".repeat(r.rating)}
+              ${"★".repeat(Number(r.rating))}
             </div>
+
             <p style="margin:6px 0;">"${r.review}"</p>
             <strong>- ${r.name}</strong>
           </div>
         `;
       });
-    });
+    })
+    .catch(err => console.error("Review load error:", err));
 }
-/* ===== END CUSTOMER REVIEW SCRIPT ===== */
+
+  /* ===== END CUSTOMER REVIEW SCRIPT ===== */
 
 document.addEventListener('DOMContentLoaded', function(){
   renderCart();
@@ -945,6 +954,7 @@ document.addEventListener('DOMContentLoaded', function(){
 <script src="main-cart.js"></script>
 
 </html>
+
 
 
 

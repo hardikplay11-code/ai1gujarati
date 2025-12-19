@@ -446,7 +446,7 @@ argin-top:14px; display:flex; gap:10px;">
 
 <script>
 /* MERGED SCRIPT FROM HOMEPAGE - copied verbatim so products page uses same functions */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9y15oBOcBmsYR9PaS9cg59pTJJOQFWSSYavR-bAKf8h1DbMBYeVML1YLq-cyAIC36/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxXGK5MY1jk4M8yBhQKEQjWu3SXoPfQK4rsgGgi-ibKl00eF60OdhaADE1fBZOZrU-0lA/exec";
 let cart = [];
 const weightMultipliers = { "250g": 1, "500g": 2, "1kg": 4 };
 function safeParseInt(v){ return parseInt(String(v||"0").replace(/[^\d]/g,''),10) || 0; }
@@ -535,31 +535,18 @@ function buyNow(){
     const unit = os_current.unit || findProductPrice(os_current.name);
     amount = unit * mult * os_current.qty;
   }
-// --- PAYMENT VALUES (SAFE DEFAULTS) ---
-const selectedPayment =
-  document.querySelector('input[name="paymentMethod"]:checked')?.value || "COD";
-
-const upiTransactionId =
-  document.getElementById("upiTxnId")?.value || "";
-
-const paymentStatus =
-  selectedPayment === "UPI" ? "Paid" : "Pending";
 
   const data = {
-  name: buyer,
-  phone,
-  items: itemsStr,
-  amount,
-  house: document.getElementById("os_house").value || "",
-  street: document.getElementById("os_street").value || "",
-  city: document.getElementById("os_city").value || "",
-  pincode: document.getElementById("os_pin").value || "",
-  timestamp: new Date().toISOString(),
-
-  payment: selectedPayment,           // ✅ ADD
-  transaction_id: upiTransactionId,   // ✅ ADD
-  payment_status: paymentStatus       // ✅ ADD
-};
+    name: buyer,
+    phone,
+    items: itemsStr,
+    amount,
+    house: document.getElementById("os_house").value || "",
+    street: document.getElementById("os_street").value || "",
+    city: document.getElementById("os_city").value || "",
+    pincode: document.getElementById("os_pin").value || "",
+    timestamp: new Date().toISOString()
+  };
 
   fetch(APPS_SCRIPT_URL, {
     method: "POST",

@@ -432,8 +432,39 @@ sapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
     </div>
   </div>
 
-  <div style="m
-argin-top:14px; display:flex; gap:10px;">
+  
+<!-- ===== PAYMENT METHOD (ADDED) ===== -->
+<div id="paymentSection" style="margin-top:14px;">
+  <label style="font-weight:700;">Payment Method</label>
+
+  <div style="margin-top:8px;">
+    <label style="display:block; margin-bottom:6px;">
+      <input type="radio" name="paymentMethod" value="Cash on Delivery" checked onclick="toggleUPI(false)">
+      Cash on Delivery
+    </label>
+
+    <label style="display:block;">
+      <input type="radio" name="paymentMethod" value="UPI" onclick="toggleUPI(true)">
+      UPI (Google Pay / PhonePe / Paytm)
+    </label>
+  </div>
+
+  <div id="upiBox" style="
+    display:none;
+    margin-top:12px;
+    padding:12px;
+    background:#fff4e0;
+    border-radius:12px;
+    text-align:center;
+  ">
+    <div style="font-weight:700;">Pay via UPI</div>
+    <div style="margin-top:6px;"><strong>UPI ID:</strong> 7984090490@kotak811</div>
+    <img src="upi-qr.jpg" style="width:180px; margin-top:8px; border-radius:10px;">
+    <input id="upiTxnId" required placeholder="Enter UPI Transaction ID"
+      style="width:100%; padding:10px; margin-top:10px; border-radius:8px; border:1px solid #ccc;">
+  </div>
+</div>
+<div style="margin-top:14px; display:flex; gap:10px;">
     <button class="btn cart-btn" style="flex:1;" onclick="addOrderToCart()">Add to Cart</button>
     <button class="btn whatsapp-btn" style="flex:1;" onclick="buyNow()">Buy Now</button>
   </div>
@@ -444,9 +475,36 @@ argin-top:14px; display:flex; gap:10px;">
   </div>
 </div>
 
+<!-- OLD fullOrderPage kept but not used in 2C - left for compatibility -->
+<div id="fullOrderPage" style="display:none;">
+  <div class="full-order-header" style="
+      padding:20px; 
+      background:#ff9933; 
+      color:white; 
+      font-size:20px; 
+      font-weight:800; 
+      display:flex; 
+      align-items:center;
+    ">
+    <span class="full-order-back" onclick="closeFullOrder()" style="cursor:pointer; margin-right:12px; font-size:26px;">←</span>
+    Complete Your Order
+  </div>
+
+  <div style="padding:20px;">
+    <h3 id="fullProductTitle" style="font-size:18px; margin-bottom:14px; color:#d65a00;"></h3>
+    <div id="priceBreak" class="price-box">
+      <div class="price-line"><span>Subtotal</span><span id="pb_sub">₹0</span></div>
+      <div class="price-total">Total: <span id="pb_total">₹0</span></div>
+    </div>
+  </div>
+</div>
+
 <script>
+function minimizeCartSheet(){
+  document.getElementById("cartSheet").classList.remove("show");
+}
 /* MERGED SCRIPT FROM HOMEPAGE - copied verbatim so products page uses same functions */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxXGK5MY1jk4M8yBhQKEQjWu3SXoPfQK4rsgGgi-ibKl00eF60OdhaADE1fBZOZrU-0lA/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUvvp5ffQ9bV3QKIHUpFETI0DFauUs1Qg1u6TjRpkr0Lz6eB7rA2qJ-oWP09XD_V2B/exec";
 let cart = [];
 const weightMultipliers = { "250g": 1, "500g": 2, "1kg": 4 };
 function safeParseInt(v){ return parseInt(String(v||"0").replace(/[^\d]/g,''),10) || 0; }
@@ -536,17 +594,30 @@ function buyNow(){
     amount = unit * mult * os_current.qty;
   }
 
+const selectedPayment =
+  document.querySelector('input[name="paymentMethod"]:checked')?.value || "COD";
+
+const upiTransactionId =
+  document.getElementById("upiTxnId")?.value || "";
+
+const paymentStatus =
+  selectedPayment === "UPI" ? "Paid" : "Pending";
+
   const data = {
-    name: buyer,
-    phone,
-    items: itemsStr,
-    amount,
-    house: document.getElementById("os_house").value || "",
-    street: document.getElementById("os_street").value || "",
-    city: document.getElementById("os_city").value || "",
-    pincode: document.getElementById("os_pin").value || "",
-    timestamp: new Date().toISOString()
-  };
+  name: buyer,
+  phone,
+  items: itemsStr,
+  amount,
+  house: document.getElementById("os_house").value || "",
+  street: document.getElementById("os_street").value || "",
+  city: document.getElementById("os_city").value || "",
+  pincode: document.getElementById("os_pin").value || "",
+  timestamp: new Date().toISOString(),
+
+  payment: selectedPayment,           // ✅ ADD
+  transaction_id: upiTransactionId,   // ✅ ADD
+  payment_status: paymentStatus       // ✅ ADD
+};
 
   fetch(APPS_SCRIPT_URL, {
     method: "POST",
@@ -565,6 +636,40 @@ function minimizeCartSheet(){ document.getElementById("cartSheet").classList.rem
 
 /* initialize */
 document.addEventListener('DOMContentLoaded', function(){ renderCart(); });
+function toggleUPI(show){
+  const box = document.getElementById("upiBox");
+  if(box) box.style.display = show ? "block" : "none";
+  if(!show){
+    const t = document.getElementById("upiTxnId");
+    if(t) t.value = "";
+  }
+}
+
+function getSelectedPayment(){
+  const p = document.querySelector('input[name="paymentMethod"]:checked');
+  return p ? p.value : "Cash on Delivery";
+}
 </script>
+<div class="footer">
+  © 2025 Ai1 Gujarati Snacks — Freshly Made & Delivered Across India
+</div>
+
+</body>
+<script src="main-cart.js">
+function toggleUPI(show){
+  const box = document.getElementById("upiBox");
+  if(box) box.style.display = show ? "block" : "none";
+  if(!show){
+    const t = document.getElementById("upiTxnId");
+    if(t) t.value = "";
+  }
+}
+
+function getSelectedPayment(){
+  const p = document.querySelector('input[name="paymentMethod"]:checked');
+  return p ? p.value : "Cash on Delivery";
+}
+</script>
+
 </body>
 </html>

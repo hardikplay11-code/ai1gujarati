@@ -126,9 +126,77 @@
   transition: 0.2s !important;
 }
 
+
+.filter-tabs-wrapper{
+  position: sticky;
+  top: 70px;
+  z-index: 999;
+  width: 100%;
+  background: #fff4e0;
+}
+
+.filter-tabs{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  padding: 12px 16px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.filter-tabs::-webkit-scrollbar{display:none;}
+
+.tab{
+  white-space: nowrap;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #f5f5f5;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tab.active{
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+
+/* === MAKAR SANKRANTI FESTIVE EFFECT === */
+#makar-bg {
+  position: fixed;
+  inset: 0;
+  background: url('kitebg.jpg') center/cover no-repeat;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+body.makar-active #makar-bg {
+  opacity: 1;
+}
+
+.kite {
+  position: fixed;
+  width: 50px;
+  height: 50px;
+  width: 60px;
+  pointer-events: none;
+  animation: floatUp 4s linear forwards;
+  z-index: 2000;
+}
+
+@keyframes floatUp {
+  from { transform: translateY(100vh) rotate(0deg); opacity: 1; }
+  to { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
+}
+
 </style>
 </head>
 <body>
+<div id='makar-bg'></div>
 
 <header>
   <div class="brand" style="display:flex; align-items:center; gap:10px;">
@@ -139,7 +207,8 @@
   <div style="display:flex; align-items:center; gap:16px;">
     <a href="index.html" style="padding:8px 14px; background:#ff9933; color:white; border-radius:8px; font-weight:700; text-decoration:none;">Home</a>
 
-   <div class="Whatsapp"><a href="https://wa.me/917984090490" style=" display:inline-block; padding:12px 18px; background:#25d366; color:white; font-weight:700; text-decoration:none; border-radius:10px; margin:10px 0; display:inline-flex; align-items:center; gap:8px; ">💬 Chat on WhatsApp</a></div>
+<div class="Whatsapp"><a href="https://wa.me/917984090490" style=" display:inline-block; padding:12px 18px; background:#25d366; color:white; font-weight:700; text-decoration:none; border-radius:10px; margin:10px 0; display:inline-flex; align-items:center; gap:8px; ">💬 Chat on WhatsApp</a></div>
+
     <div onclick="openCartSheet()" style="cursor:pointer; position:relative; font-size:22px;">
       🛒
       <span id="cartBadge">0</span>
@@ -154,6 +223,18 @@
 <input type="text" id="smartSearch" placeholder="Search products..."
 oninput="smartSearchProducts()"
 style="width:100%; padding:12px 16px; border:2px solid #ff9933; border-radius:12px; font-size:16px; outline:none; box-shadow:0 3px 10px rgba(0,0,0,0.05);">
+ </div>
+
+<!-- CATEGORY FILTER TABS -->
+<div class="filter-tabs-wrapper">
+  <div class="filter-tabs">
+    <button class="tab active" data-filter="all">All</button>
+    <button class="tab" data-filter="makar">Makarsankranti Special</button>
+    <button class="tab" data-filter="ai1">Ai1 Special Combo</button>
+    <button class="tab" data-filter="trending">Trending Product</button>
+ 
+</div>
+
 </div>
 
 
@@ -175,7 +256,7 @@ card.style.display = name.includes(term) ? 'block' : 'none';
   <section class="products">
 
     <!-- PRODUCT 1 -->
-    <div class="card" data-name="Methi Khakhra" data-price="135">
+    <div class="card" data-category="trending" data-name="Methi Khakhra" data-price="135">
       <img src="methi-khakhra.png" alt="Methi Khakhra">
       <h3>Methi Khakhra</h3>
       <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Crispy, aromatic methi-flavored khakhra roasted to perfection. A traditional Gujarati snack perfect for tea-time.</p>
@@ -190,8 +271,89 @@ card.style.display = name.includes(term) ? 'block' : 'none';
       </div>
     </div>
 
+    <!-- PRODUCT 13: Sing-dana Chikki -->
+    <div class="card" data-category="makar trending" data-name="Sing-dana Chikki" data-price="80">
+      <img src="Sing dana chikki.jpeg" alt="Sing-dana Chikki">
+      <h3>Sing-dana Chikki</h3>
+      <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Sing Dana Chikki is a crunchy peanut brittle made with roasted peanuts and pure jaggery. A classic, energy-rich sweet with the perfect balance of sweetness and crunch.</p>
+      <div class="price">₹80</div>
+      <div class="actions">
+        <select class="qty-box">
+           <option value="250g">250g</option>
+          <option value="500g">500g</option>
+        </select>
+        <button class="btn whatsapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
+        <button class="btn cart-btn" onclick="addCartFromCard(this.closest('.card'))">Add to Cart</button>
+      </div>
+    </div>
+
+  <!-- PRODUCT 14: Til laddu -->
+    <div class="card" data-category="makar" data-name="Til Laddu" data-price="90">
+      <img src="til laddu.jpg" alt="Til Laddu">
+      <h3>Til Laddu</h3>
+      <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Til Laddu Mini are bite-sized sesame ladoos made with roasted til and pure jaggery. Sweet, nutty, and wholesome—perfect for quick snacking and sharing.</p>
+      <div class="price">₹90</div>
+      <div class="actions">
+        <select class="qty-box">
+           <option value="250g">250g</option>
+          <option value="500g">500g</option>
+        </select>
+        <button class="btn whatsapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
+        <button class="btn cart-btn" onclick="addCartFromCard(this.closest('.card'))">Add to Cart</button>
+      </div>
+    </div>
+
+  <!-- PRODUCT 15: Mini Kachori(Jamnagari Kachori)-->
+    <div class="card" data-category="trending" data-name="Mini Kachori(Jamnagari Kachori)" data-price="90">
+      <img src="mini kachori.jpeg" alt="Mini Kachori(Jamnagari Kachori)">
+      <h3>Mini Kachori(Jamnagari Kachori)</h3>
+      <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Mini Jamnagari Kachori are crispy, bite-sized snacks filled with spicy, tangy traditional masala from Jamnagar. Perfect for tea-time and quick munching, they deliver big flavor in every mini bite.</p>
+      <div class="price">₹90</div>
+      <div class="actions">
+        <select class="qty-box">
+           <option value="250g">250g</option>
+          <option value="500g">500g</option>
+        </select>
+        <button class="btn whatsapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
+        <button class="btn cart-btn" onclick="addCartFromCard(this.closest('.card'))">Add to Cart</button>
+      </div>
+    </div>
+
+  <!-- PRODUCT 16: Mava Chikki-->
+    <div class="card" data-category="makar" data-name="Mava Chikki" data-price="75">
+      <img src="mava chikki.jpeg" alt="Mava Chikki">
+      <h3>Mava Chikki</h3>
+      <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Mava Chikki is a rich nutty sweet made with creamy mava and roasted nuts, offering a soft crunch and delicious melt-in-the-mouth taste. Perfect for sweet cravings and gifting.</p>
+      <div class="price">₹75</div>
+      <div class="actions">
+        <select class="qty-box">
+           <option value="250g">250g</option>
+          <option value="500g">500g</option>
+        </select>
+        <button class="btn whatsapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
+        <button class="btn cart-btn" onclick="addCartFromCard(this.closest('.card'))">Add to Cart</button>
+      </div>
+    </div>
+
+    <!-- PRODUCT 9: Namkeen Chevdo -->
+    <div class="card" data-category="makar trending" data-name="Namkeen Chevdo" data-price="70">
+      <img src="namkeen chevdo.jpeg" alt="Namkeen Chevdo">
+      <h3>Namkeen Chevdo</h3>
+      <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">A crispy, light and perfectly spiced Gujarati-style snack, made with puffed rice and crunchy flakes. Fresh, flavorful and ideal for tea-time or anytime munching.
+</p>
+      <div class="price">₹70</div>
+      <div class="actions">
+        <select class="qty-box">
+           <option value="250g">250g</option>
+          <option value="500g">500g</option>
+        </select>
+        <button class="btn whatsapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
+        <button class="btn cart-btn" onclick="addCartFromCard(this.closest('.card'))">Add to Cart</button>
+      </div>
+    </div>
+
     <!-- PRODUCT 2 -->
-    <div class="card" data-name="Sev" data-price="80">
+    <div class="card" data-category="all" data-name="Sev" data-price="80">
       <img src="sev.png" alt="Sev">
       <h3>Sev</h3>
       <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Fresh, crunchy besan sev with authentic Gujarati spices. Light, tasty and perfect for snacking or topping dishes.</p>
@@ -207,7 +369,7 @@ card.style.display = name.includes(term) ? 'block' : 'none';
     </div>
 
     <!-- PRODUCT 3 -->
-    <div class="card" data-name="Bhakharvadi" data-price="90">
+    <div class="card" data-category="all" data-name="Bhakharvadi" data-price="90">
       <img src="bhakharvadi.png" alt="Bhakharvadi">
       <h3>Bhakharvadi</h3>
       <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Traditional spiral snack stuffed with a sweet–spicy filling. Crispy, flavorful and a perfect tea-time delight.</p>
@@ -225,7 +387,7 @@ sapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
 
       
     <!-- PRODUCT 4: Ganthiya -->
-    <div class="card" data-name="Ganthiya" data-price="120">
+    <div class="card" data-category="all" data-name="Ganthiya" data-price="120">
       <img src="ganthiya.png" alt="Ganthiya">
       <h3>Ganthiya</h3>
       <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Soft, traditional Gujarati Ganthiya made with premium besan. Light, airy and perfect with tea.</p>
@@ -241,7 +403,7 @@ sapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
     </div>
 
     <!-- PRODUCT 5: Papdi -->
-    <div class="card" data-name="Papdi" data-price="110">
+    <div class="card" data-category="makar" data-name="Papdi" data-price="110">
       <img src="papdi.png" alt="Papdi">
       <h3>Papdi</h3>
       <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Crispy, thin papdi perfect for chaats & snacking. Light crunch with authentic spices.</p>
@@ -257,7 +419,7 @@ sapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
     </div>
 
     <!-- PRODUCT 6: Masala Sev -->
-    <div class="card" data-name="Masala Sev" data-price="95">
+    <div class="card" data-category="all" data-name="Masala Sev" data-price="95">
       <img src="masala-sev.png" alt="Masala Sev">
       <h3>Masala Sev</h3>
       <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Spicy, tangy masala sev packed with bold Gujarati flavours. A perfect crunchy treat.</p>
@@ -273,7 +435,7 @@ sapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
     </div>
 
     <!-- PRODUCT 7: Ratnami Sev -->
-    <div class="card" data-name="Ratnami Sev" data-price="100">
+    <div class="card" data-category="all" data-name="Ratnami Sev" data-price="100">
       <img src="ratnami-sev.png" alt="Ratnami Sev">
       <h3>Ratnami (Spicy) Sev</h3>
       <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Extra spicy Ratnami sev with fiery masala. Perfect for spice lovers!</p>
@@ -289,7 +451,7 @@ sapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
     </div>
 
     <!-- PRODUCT 8: Sakkarpara -->
-    <div class="card" data-name="Sakkarpara" data-price="130">
+    <div class="card" data-category="all" data-name="Sakkarpara" data-price="130">
       <img src="sakkarpara.png" alt="Sakkarpara">
       <h3>Sakkarpara</h3>
       <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Sweet, crunchy Sakkarpara made with pure ghee. A delightful bite-size treat.</p>
@@ -305,72 +467,6 @@ sapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
     </div>
 
 
-
-    <!-- PRODUCT 9: Namkeen Chevdo -->
-    <div class="card" data-name="Namkeen Chevdo" data-price="70">
-      <img src="namkeen chevdo.jpeg" alt="Namkeen Chevdo">
-      <h3>Namkeen Chevdo</h3>
-      <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">A crispy, light and perfectly spiced Gujarati-style snack, made with puffed rice and crunchy flakes. Fresh, flavorful and ideal for tea-time or anytime munching.
-</p>
-      <div class="price">₹70</div>
-      <div class="actions">
-        <select class="qty-box">
-           <option value="250g">250g</option>
-          <option value="500g">500g</option>
-        </select>
-        <button class="btn whatsapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
-        <button class="btn cart-btn" onclick="addCartFromCard(this.closest('.card'))">Add to Cart</button>
-      </div>
-    </div>
-
-
-<!-- PRODUCT 10: Bambooless Dhoop Stick -->
-    <div class="card" data-name="Bambooless Dhoop Stick" data-price="160">
-      <img src="bambooless-dhoop.png" alt="Bambooless Dhoop Stick">
-      <h3>Bambooless Dhoop Stick</h3>
-      <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Pure ayurvedic dhoop sticks with rich aroma. No bamboo, 100% natural.</p>
-      <div class="price">₹160</div>
-      <div class="actions">
-        <select class="qty-box">
-          <option value="10 sticks">10 sticks</option>
-          <option value="20 sticks">20 sticks</option>
-        </select>
-        <button class="btn whatsapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
-        <button class="btn cart-btn" onclick="addCartFromCard(this.closest('.card'))">Add to Cart</button>
-      </div>
-    </div>
-
-    <!-- PRODUCT 11: Bambooless Dhoop Stick -->
-    <div class="card" data-name="Bambooless Dhoop Stick" data-price="160">
-      <img src="bambooless-dhoop.png" alt="Bambooless Dhoop Stick">
-      <h3>Bambooless Dhoop Stick</h3>
-      <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Pure ayurvedic dhoop sticks with rich aroma. No bamboo, 100% natural.</p>
-      <div class="price">₹160</div>
-      <div class="actions">
-        <select class="qty-box">
-          <option value="10 sticks">10 sticks</option>
-          <option value="20 sticks">20 sticks</option>
-        </select>
-        <button class="btn whatsapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
-        <button class="btn cart-btn" onclick="addCartFromCard(this.closest('.card'))">Add to Cart</button>
-      </div>
-    </div>
-
-    <!-- PRODUCT 12: Hair Growth Oil -->
-    <div class="card" data-name="Hair Growth Oil" data-price="199">
-      <img src="hair-oil.png" alt="Hair Growth Oil">
-      <h3>Hair Growth Oil</h3>
-      <p class="desc" style="font-size:14px;color:#6b5b4d;line-height:20px;">Ayurvedic hair growth oil enriched with natural herbs for thicker, stronger hair.</p>
-      <div class="price">₹199</div>
-      <div class="actions">
-        <select class="qty-box">
-          <option value="100ml">100ml</option>
-          <option value="200ml">200ml</option>
-        </select>
-        <button class="btn whatsapp-btn" onclick="openOrderSheet(this.closest('.card'))">Order Now</button>
-        <button class="btn cart-btn" onclick="addCartFromCard(this.closest('.card'))">Add to Cart</button>
-      </div>
-    </div>
 
 </section>
 </main>
@@ -653,6 +749,64 @@ function getSelectedPayment(){
   © 2025 Ai1 Gujarati Snacks — Freshly Made & Delivered Across India
 </div>
 
+
+<script>
+(function(){
+  const tabs = document.querySelectorAll('.tab');
+  const cards = document.querySelectorAll('.card');
+
+  function applyFilter(filter){
+    cards.forEach(card=>{
+      const cat = card.dataset.category || 'all';
+      card.style.display =
+        filter === 'all' || cat.split(' ').includes(filter) ? 'block' : 'none';
+    });
+  }
+
+  tabs.forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      tabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      applyFilter(tab.dataset.filter);
+    });
+  });
+
+  applyFilter('all');
+})();
+</script>
+
+
+<script>
+function triggerMakarEffect(){
+  document.body.classList.add('makar-active');
+
+  for(let i=0;i<18;i++){
+    
+    const kite = document.createElement('div');
+    kite.innerHTML = `<svg width="50" height="50" viewBox="0 0 100 100">
+      <polygon points="50,0 100,50 50,100 0,50" fill="#ff5722"/>
+      <line x1="50" y1="100" x2="50" y2="160" stroke="#555" stroke-width="3"/>
+    </svg>`;
+    
+    kite.className = 'kite';
+    kite.style.left = Math.random()*100 + 'vw';
+    kite.style.animationDelay = (Math.random()*0.5)+'s';
+    document.body.appendChild(kite);
+    setTimeout(()=>kite.remove(), 4500);
+  }
+}
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    if(tab.dataset.filter === 'makar'){
+      triggerMakarEffect();
+    } else {
+      document.body.classList.remove('makar-active');
+    }
+  });
+});
+</script>
+
 </body>
 <script src="main-cart.js">
 function toggleUPI(show){
@@ -670,6 +824,63 @@ function getSelectedPayment(){
 }
 </script>
 
+
+<script>
+(function(){
+  const tabs = document.querySelectorAll('.tab');
+  const cards = document.querySelectorAll('.card');
+
+  function applyFilter(filter){
+    cards.forEach(card=>{
+      const cat = card.dataset.category || 'all';
+      card.style.display =
+        filter === 'all' || cat.split(' ').includes(filter) ? 'block' : 'none';
+    });
+  }
+
+  tabs.forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      tabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      applyFilter(tab.dataset.filter);
+    });
+  });
+
+  applyFilter('all');
+})();
+</script>
+
+
+<script>
+function triggerMakarEffect(){
+  document.body.classList.add('makar-active');
+
+  for(let i=0;i<18;i++){
+    
+    const kite = document.createElement('div');
+    kite.innerHTML = `<svg width="50" height="50" viewBox="0 0 100 100">
+      <polygon points="50,0 100,50 50,100 0,50" fill="#ff5722"/>
+      <line x1="50" y1="100" x2="50" y2="160" stroke="#555" stroke-width="3"/>
+    </svg>`;
+    
+    kite.className = 'kite';
+    kite.style.left = Math.random()*100 + 'vw';
+    kite.style.animationDelay = (Math.random()*0.5)+'s';
+    document.body.appendChild(kite);
+    setTimeout(()=>kite.remove(), 4500);
+  }
+}
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    if(tab.dataset.filter === 'makar'){
+      triggerMakarEffect();
+    } else {
+      document.body.classList.remove('makar-active');
+    }
+  });
+});
+</script>
+
 </body>
 </html>
-
